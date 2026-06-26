@@ -1,5 +1,6 @@
+import { router } from 'expo-router';
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import Card from '@/components/Card';
 import Header from '@/components/Header';
@@ -7,17 +8,26 @@ import Screen from '@/components/Screen';
 import { Colours } from '@/constants/colors';
 import { subjects } from '@/data/subjects';
 
-export default function NotesScreen() {
+export default function SubjectsScreen() {
   return (
     <Screen>
       <Header
         title="Your subjects"
-        subtitle="Choose a subject to organise notes, tasks, flashcards and AI support."
+        subtitle="Choose a subject to organise notes, tasks, flashcards and Higher."
       />
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {subjects.map((subject) => (
-          <View key={subject.id} style={styles.subjectWrap}>
+          <Pressable
+            key={subject.id}
+            onPress={() =>
+              router.push({
+                pathname: '/subject/[id]',
+                params: { id: subject.id },
+              } as never)
+            }
+            style={styles.subjectWrap}
+          >
             <Card>
               <Text style={styles.label}>
                 {subject.level === 'university' ? 'UNIVERSITY' : 'HIGH SCHOOL'}
@@ -37,7 +47,7 @@ export default function NotesScreen() {
 
               <Text style={styles.nextTask}>Next: {subject.nextTask}</Text>
             </Card>
-          </View>
+          </Pressable>
         ))}
       </ScrollView>
     </Screen>
@@ -75,7 +85,6 @@ const styles = StyleSheet.create({
   progressFill: {
     height: '100%',
     backgroundColor: Colours.SAGE,
-    borderRadius: 999,
   },
   nextTask: {
     fontSize: 14,

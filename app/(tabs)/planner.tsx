@@ -1,31 +1,36 @@
-import { Colours } from '@/constants/colors';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { StyleSheet, Text } from 'react-native';
 
-export default function NotesScreen() {
+import Header from '@/components/Header';
+import Screen from '@/components/Screen';
+import { Colours } from '@/constants/colors';
+
+export default function CreateScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>HIGHER ART</Text>
-      <Text style={styles.title}>Notes</Text>
-    </View>
+    <Screen>
+      <Header
+        title="Create"
+        subtitle="Quickly create notes, tasks, flashcards, subjects and imports."
+      />
+
+      <Text style={styles.label}>COMING SOON</Text>
+      <Text style={styles.body}>
+        This will become the create menu for Higher Art.
+      </Text>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colours.WARM_WHITE,
-    paddingTop: 80,
-    paddingHorizontal: 24,
-  },
   label: {
     fontSize: 11,
     letterSpacing: 2,
     color: Colours.STONE,
     marginBottom: 12,
   },
-  title: {
-    fontSize: 36,
+  body: {
+    fontSize: 16,
+    lineHeight: 24,
     color: Colours.INK,
-    fontWeight: '500',
   },
 });
