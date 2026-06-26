@@ -22,13 +22,9 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    async function prepare() {
-      if (fontsLoaded) {
-        await SplashScreen.hideAsync();
-      }
+    if (fontsLoaded) {
+      SplashScreen.hideAsync();
     }
-
-    prepare();
   }, [fontsLoaded]);
 
   if (!fontsLoaded) {
@@ -36,12 +32,13 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="onboarding" />
-      <Stack.Screen name="create-subject" />
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="subject/[id]" />
-    </Stack>
+  <Stack screenOptions={{ headerShown: false }}>
+  <Stack.Screen name="(tabs)" />
+  <Stack.Screen name="onboarding" />
+  <Stack.Screen name="create-subject" />
+<Stack.Screen name="subject/[id]/index" />
+<Stack.Screen name="subject/[id]/notes" />
+<Stack.Screen name="subject/[id]/new-note" />
+</Stack>
   );
 }
