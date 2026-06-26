@@ -12,21 +12,23 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { useEffect } from 'react';
 
-SplashScreen.preventAutoHideAsync();
-
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
-    PlayfairDisplay_400Regular_Italic,
-    PlayfairDisplay_500Medium,
     DMSans_300Light,
     DMSans_400Regular,
     DMSans_500Medium,
+    PlayfairDisplay_400Regular_Italic,
+    PlayfairDisplay_500Medium,
   });
 
   useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync();
+    async function prepare() {
+      if (fontsLoaded) {
+        await SplashScreen.hideAsync();
+      }
     }
+
+    prepare();
   }, [fontsLoaded]);
 
   if (!fontsLoaded) {
@@ -35,7 +37,11 @@ export default function RootLayout() {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="onboarding" />
+      <Stack.Screen name="create-subject" />
       <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="subject/[id]" />
     </Stack>
   );
 }

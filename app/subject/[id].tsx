@@ -6,10 +6,11 @@ import Card from '@/components/Card';
 import Header from '@/components/Header';
 import Screen from '@/components/Screen';
 import { Colours } from '@/constants/colors';
-import { subjects } from '@/data/subjects';
+import { useAppStore } from '@/src/store';
 
 export default function SubjectWorkspaceScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const subjects = useAppStore((state) => state.subjects);
 
   const subject = subjects.find((item) => item.id === id);
 
@@ -37,11 +38,10 @@ export default function SubjectWorkspaceScreen() {
       <Header title={subject.code} subtitle={subject.name} />
 
       <Card>
-        <Text style={styles.label}>NEXT STEP</Text>
-        <Text style={styles.title}>{subject.nextTask}</Text>
+        <Text style={styles.label}>WORKSPACE</Text>
+        <Text style={styles.title}>Your subject is ready.</Text>
         <Text style={styles.body}>
-          This subject workspace will hold notes, tasks, flashcards, progress
-          and Higher context.
+          This workspace will hold notes, tasks, flashcards, progress and Higher context.
         </Text>
       </Card>
 

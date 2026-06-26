@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
@@ -6,11 +7,12 @@ import Card from '@/components/Card';
 import Header from '@/components/Header';
 import Screen from '@/components/Screen';
 import { Colours } from '@/constants/colors';
-import { subjects } from '@/data/subjects';
-
-const currentSubject = subjects[0];
+import { useAppStore } from '@/src/store';
 
 export default function HomeScreen() {
+  const subjects = useAppStore((state) => state.subjects);
+  const currentSubject = subjects[0];
+
   return (
     <Screen>
       <View style={styles.logoWrap}>
@@ -23,51 +25,62 @@ export default function HomeScreen() {
 
       <Header
         title="Good morning."
-        subtitle="Continue where you left off."
+        subtitle={
+          currentSubject
+            ? 'Continue where you left off.'
+            : 'Create your first subject to begin.'
+        }
       />
 
-      <Card>
-        <Text style={styles.cardLabel}>CURRENT SUBJECT</Text>
-        <Text style={styles.subjectCode}>{currentSubject.code}</Text>
-        <Text style={styles.subjectName}>{currentSubject.name}</Text>
+      {currentSubject ? (
+        <>
+          <Card>
+            <Text style={styles.cardLabel}>CURRENT SUBJECT</Text>
+            <Text style={styles.subjectCode}>{currentSubject.code}</Text>
+            <Text style={styles.subjectName}>{currentSubject.name}</Text>
 
-        <View style={styles.progressTrack}>
-          <View
-            style={[
-              styles.progressFill,
-              { width: `${currentSubject.progress}%` },
-            ]}
-          />
-        </View>
+            <View style={styles.progressTrack}>
+              <View
+                style={[
+                  styles.progressFill,
+                  { width: `${currentSubject.progress}%` },
+                ]}
+              />
+            </View>
 
-        <Text style={styles.cardBody}>Next: {currentSubject.nextTask}</Text>
-      </Card>
+            <Text style={styles.cardBody}>Your workspace is ready.</Text>
+          </Card>
 
-      <View style={styles.statsRow}>
-        <View style={styles.statBox}>
-          <Text style={styles.statNumber}>12</Text>
-          <Text style={styles.statLabel}>day streak</Text>
-        </View>
+          <View style={styles.buttonWrap}>
+            <Button
+              title="Continue studying"
+              onPress={() =>
+                router.push({
+                  pathname: '/subject/[id]',
+                  params: { id: currentSubject.id },
+                } as never)
+              }
+            />
+          </View>
+        </>
+      ) : (
+        <>
+          <Card>
+            <Text style={styles.cardLabel}>EMPTY WORKSPACE</Text>
+            <Text style={styles.subjectCode}>No subjects yet</Text>
+            <Text style={styles.cardBody}>
+              Create your first subject to build your study workspace.
+            </Text>
+          </Card>
 
-        <View style={styles.statBox}>
-          <Text style={styles.statNumber}>48</Text>
-          <Text style={styles.statLabel}>cards due</Text>
-        </View>
-
-        <View style={styles.statBox}>
-          <Text style={styles.statNumber}>2h</Text>
-          <Text style={styles.statLabel}>today</Text>
-        </View>
-      </View>
-
-      <View style={styles.promptBox}>
-        <Text style={styles.cardLabel}>ASSISTANT</Text>
-        <Text style={styles.promptText}>“What should I study today?”</Text>
-      </View>
-
-      <View style={styles.buttonWrap}>
-        <Button title="Continue studying" />
-      </View>
+          <View style={styles.buttonWrap}>
+            <Button
+              title="Create subject"
+              onPress={() => router.push('/create-subject')}
+            />
+          </View>
+        </>
+      )}
     </Screen>
   );
 }
@@ -109,51 +122,11 @@ const styles = StyleSheet.create({
   progressFill: {
     height: '100%',
     backgroundColor: Colours.SAGE,
-    borderRadius: 999,
   },
   cardBody: {
     fontSize: 15,
     lineHeight: 22,
     color: Colours.STONE,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: 16,
-  },
-  statBox: {
-    flex: 1,
-    backgroundColor: Colours.OFF,
-    borderWidth: 1,
-    borderColor: Colours.RULE,
-    borderRadius: 18,
-    paddingVertical: 18,
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colours.INK,
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 11,
-    color: Colours.STONE,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  promptBox: {
-    marginTop: 16,
-    borderWidth: 1,
-    borderColor: Colours.RULE,
-    borderRadius: 18,
-    padding: 20,
-    backgroundColor: Colours.WARM_WHITE,
-  },
-  promptText: {
-    fontSize: 20,
-    color: Colours.INK,
-    fontWeight: '500',
   },
   buttonWrap: {
     marginTop: 22,
