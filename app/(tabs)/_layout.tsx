@@ -1,35 +1,28 @@
+import { Colours } from '@/constants/colors';
 import { Tabs } from 'expo-router';
 import React from 'react';
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
+        tabBarActiveTintColor: Colours.SAGE,
+        tabBarInactiveTintColor: Colours.STONE,
+        tabBarStyle: {
+          backgroundColor: Colours.WARM_WHITE,
+          borderTopColor: Colours.RULE,
+        },
+      }}
+    >
+      <Tabs.Screen name="index" options={{ title: 'Home' }} />
+      <Tabs.Screen name="notes" options={{ title: 'Subjects' }} />
+      <Tabs.Screen name="planner" options={{ title: 'Create' }} />
+      <Tabs.Screen name="assistant" options={{ title: 'Higher' }} />
+      <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
+
+      <Tabs.Screen name="tracker" options={{ href: null }} />
+      <Tabs.Screen name="flashcards" options={{ href: null }} />
     </Tabs>
   );
 }

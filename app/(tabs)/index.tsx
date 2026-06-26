@@ -1,98 +1,161 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React from 'react';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import Button from '@/components/Button';
+import Card from '@/components/Card';
+import Header from '@/components/Header';
+import Screen from '@/components/Screen';
+import { Colours } from '@/constants/colors';
+import { subjects } from '@/data/subjects';
+
+const currentSubject = subjects[0];
 
 export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
+    <Screen>
+      <View style={styles.logoWrap}>
         <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+          source={require('../../assets/images/higher-art-logo.jpg')}
+          style={styles.logo}
+          resizeMode="contain"
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+      </View>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      <Header
+        title="Good morning."
+        subtitle="Continue where you left off."
+      />
+
+      <Card>
+        <Text style={styles.cardLabel}>CURRENT SUBJECT</Text>
+        <Text style={styles.subjectCode}>{currentSubject.code}</Text>
+        <Text style={styles.subjectName}>{currentSubject.name}</Text>
+
+        <View style={styles.progressTrack}>
+          <View
+            style={[
+              styles.progressFill,
+              { width: `${currentSubject.progress}%` },
+            ]}
+          />
+        </View>
+
+        <Text style={styles.cardBody}>Next: {currentSubject.nextTask}</Text>
+      </Card>
+
+      <View style={styles.statsRow}>
+        <View style={styles.statBox}>
+          <Text style={styles.statNumber}>12</Text>
+          <Text style={styles.statLabel}>day streak</Text>
+        </View>
+
+        <View style={styles.statBox}>
+          <Text style={styles.statNumber}>48</Text>
+          <Text style={styles.statLabel}>cards due</Text>
+        </View>
+
+        <View style={styles.statBox}>
+          <Text style={styles.statNumber}>2h</Text>
+          <Text style={styles.statLabel}>today</Text>
+        </View>
+      </View>
+
+      <View style={styles.promptBox}>
+        <Text style={styles.cardLabel}>ASSISTANT</Text>
+        <Text style={styles.promptText}>“What should I study today?”</Text>
+      </View>
+
+      <View style={styles.buttonWrap}>
+        <Button title="Continue studying" />
+      </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  logoWrap: {
     alignItems: 'center',
-    gap: 8,
+    marginTop: 18,
+    marginBottom: 4,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  logo: {
+    width: 120,
+    height: 105,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  cardLabel: {
+    fontSize: 11,
+    letterSpacing: 2,
+    color: Colours.STONE,
+    marginBottom: 10,
+  },
+  subjectCode: {
+    fontSize: 30,
+    fontWeight: '600',
+    color: Colours.INK,
+    marginBottom: 4,
+  },
+  subjectName: {
+    fontSize: 15,
+    color: Colours.STONE,
+    marginBottom: 18,
+  },
+  progressTrack: {
+    height: 7,
+    backgroundColor: Colours.RULE,
+    borderRadius: 999,
+    overflow: 'hidden',
+    marginBottom: 14,
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: Colours.SAGE,
+    borderRadius: 999,
+  },
+  cardBody: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: Colours.STONE,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 16,
+  },
+  statBox: {
+    flex: 1,
+    backgroundColor: Colours.OFF,
+    borderWidth: 1,
+    borderColor: Colours.RULE,
+    borderRadius: 18,
+    paddingVertical: 18,
+    alignItems: 'center',
+  },
+  statNumber: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: Colours.INK,
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 11,
+    color: Colours.STONE,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  promptBox: {
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: Colours.RULE,
+    borderRadius: 18,
+    padding: 20,
+    backgroundColor: Colours.WARM_WHITE,
+  },
+  promptText: {
+    fontSize: 20,
+    color: Colours.INK,
+    fontWeight: '500',
+  },
+  buttonWrap: {
+    marginTop: 22,
   },
 });
