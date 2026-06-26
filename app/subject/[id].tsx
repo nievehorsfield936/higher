@@ -1,6 +1,6 @@
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import Card from '@/components/Card';
 import Header from '@/components/Header';
@@ -16,20 +16,32 @@ export default function SubjectWorkspaceScreen() {
   if (!subject) {
     return (
       <Screen>
-        <Header title="Subject not found" subtitle="This subject could not be loaded." />
+        <Pressable onPress={() => router.back()}>
+          <Text style={styles.backText}>← Back</Text>
+        </Pressable>
+
+        <Header
+          title="Subject not found"
+          subtitle="This subject could not be loaded."
+        />
       </Screen>
     );
   }
 
   return (
     <Screen>
+      <Pressable onPress={() => router.back()}>
+        <Text style={styles.backText}>← Back</Text>
+      </Pressable>
+
       <Header title={subject.code} subtitle={subject.name} />
 
       <Card>
         <Text style={styles.label}>NEXT STEP</Text>
         <Text style={styles.title}>{subject.nextTask}</Text>
         <Text style={styles.body}>
-          This subject workspace will hold notes, tasks, flashcards, progress and Higher AI context.
+          This subject workspace will hold notes, tasks, flashcards, progress
+          and Higher context.
         </Text>
       </Card>
 
@@ -59,6 +71,13 @@ export default function SubjectWorkspaceScreen() {
 }
 
 const styles = StyleSheet.create({
+  backText: {
+    marginTop: 16,
+    marginBottom: 16,
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colours.SAGE,
+  },
   label: {
     fontSize: 11,
     letterSpacing: 2,
