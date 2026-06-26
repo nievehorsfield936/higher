@@ -1,8 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import Button from '@/components/Button';
 import Header from '@/components/Header';
 import Screen from '@/components/Screen';
 import { Colours } from '@/constants/colors';
@@ -19,18 +18,25 @@ export default function NoteDetailScreen() {
 
   const [title, setTitle] = useState(note?.title ?? '');
   const [content, setContent] = useState(note?.content ?? '');
+  const [saveStatus, setSaveStatus] = useState('Saved');
 
-  function handleSave() {
+  useEffect(() => {
     if (!note) return;
 
-    updateNote(note.id, {
-      title: title.trim() || 'Untitled Note',
-      content: content.trim(),
-      updatedAt: new Date().toISOString(),
-    });
+    setSaveStatus('Saving...');
 
-    router.back();
-  }
+    const timeout = setTimeout(() => {
+      updateNote(note.id, {
+        title: title.trim() || 'Untitled Note',
+        content,
+        updatedAt: new Date().toISOString(),
+      });
+
+      setSaveStatus('Saved');
+    }, 700);
+
+    return () => clearTimeout(timeout);
+  }, [title, content]);
 
   if (!note) {
     return (
@@ -53,24 +59,21 @@ export default function NoteDetailScreen() {
         <Text style={styles.backText}>← Notes</Text>
       </Pressable>
 
-      <Header
-        title="Edit note"
-        subtitle="Update your study material."
-      />
+      <View style={styles.statusRow}>
+        <Text style={styles.statusText}>{saveStatus}</Text>
+      </View>
 
       <View style={styles.fieldGroup}>
-        <Text style={styles.label}>TITLE</Text>
         <TextInput
           value={title}
           onChangeText={setTitle}
-          placeholder="Note title"
+          placeholder="Untitled Note"
           placeholderTextColor={Colours.STONE}
           style={styles.titleInput}
         />
       </View>
 
       <View style={styles.fieldGroup}>
-        <Text style={styles.label}>NOTE</Text>
         <TextInput
           value={content}
           onChangeText={setContent}
@@ -81,8 +84,6 @@ export default function NoteDetailScreen() {
           style={styles.bodyInput}
         />
       </View>
-
-      <Button title="Save changes" onPress={handleSave} />
     </Screen>
   );
 }
@@ -90,37 +91,31 @@ export default function NoteDetailScreen() {
 const styles = StyleSheet.create({
   backText: {
     marginTop: 16,
-    marginBottom: 16,
+    marginBottom: 10,
     fontSize: 16,
     fontWeight: '600',
     color: Colours.SAGE,
   },
-  fieldGroup: {
-    marginBottom: 22,
+  statusRow: {
+    marginBottom: 14,
   },
-  label: {
-    fontSize: 11,
-    letterSpacing: 2,
+  statusText: {
+    fontSize: 12,
     color: Colours.STONE,
-    marginBottom: 10,
+  },
+  fieldGroup: {
+    marginBottom: 18,
   },
   titleInput: {
-    borderWidth: 1,
-    borderColor: Colours.RULE,
-    borderRadius: 18,
-    padding: 18,
-    fontSize: 17,
+    fontSize: 30,
+    fontWeight: '600',
     color: Colours.INK,
     backgroundColor: Colours.WARM_WHITE,
   },
   bodyInput: {
-    minHeight: 260,
-    borderWidth: 1,
-    borderColor: Colours.RULE,
-    borderRadius: 18,
-    padding: 18,
-    fontSize: 16,
-    lineHeight: 24,
+    minHeight: 420,
+    fontSize: 17,
+    lineHeight: 26,
     color: Colours.INK,
     backgroundColor: Colours.WARM_WHITE,
   },
