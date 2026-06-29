@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import Header from '@/components/Header';
 import Screen from '@/components/Screen';
-import { Colours } from '@/constants/colors';
+import { Colours } from '@/constants/colours';
 import { useAppStore } from '@/src/store';
 
 export default function NoteDetailScreen() {

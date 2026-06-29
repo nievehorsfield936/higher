@@ -2,17 +2,16 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { Colours } from '@/constants/colours';
+import { radius } from '@/src/theme';
 
 type ProgressBarProps = {
   progress: number;
-  colour?: string;
 };
 
 export default function ProgressBar({
   progress,
-  colour = Colours.SAGE,
 }: ProgressBarProps) {
-  const safeProgress = Math.max(0, Math.min(progress, 100));
+  const clampedProgress = Math.min(Math.max(progress, 0), 100);
 
   return (
     <View style={styles.track}>
@@ -20,8 +19,7 @@ export default function ProgressBar({
         style={[
           styles.fill,
           {
-            width: `${safeProgress}%`,
-            backgroundColor: colour,
+            width: `${clampedProgress}%` as `${number}%`,
           },
         ]}
       />
@@ -31,13 +29,13 @@ export default function ProgressBar({
 
 const styles = StyleSheet.create({
   track: {
-    height: 7,
+    height: 8,
     backgroundColor: Colours.RULE,
-    borderRadius: 999,
+    borderRadius: radius.pill,
     overflow: 'hidden',
   },
   fill: {
     height: '100%',
-    borderRadius: 999,
+    backgroundColor: Colours.SAGE,
   },
 });

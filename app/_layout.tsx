@@ -49,6 +49,13 @@ export default function RootLayout() {
   <Stack.Screen name="subject/[id]/deck/[deckId]/study" />
 
   <Stack.Screen name="subject/[id]/assessments" />
+  <Stack.Screen name="subject/[id]/new-assessment" />
+<Stack.Screen name="subject/[id]/assessment/[assessmentId]" />
+
+<Stack.Screen name="session/index" />
+<Stack.Screen name="session/active" />
+<Stack.Screen name="session/complete" />
+
 </Stack>
   );
 }

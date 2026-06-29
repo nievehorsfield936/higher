@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text } from 'react-native';
 
-import { Colours } from '@/constants/colors';
+import { Colours } from '@/constants/colours';
 
 interface SectionHeaderProps {
   title: string;

@@ -4,23 +4,37 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import Card from '@/components/Card';
 import Screen from '@/components/Screen';
-import { Colours } from '@/constants/colors';
-import { QuickActionCard, WorkspaceHero } from '@/src/components/workspace';
+import { Colours } from '@/constants/colours';
+import { WorkspaceHero } from '@/src/components/workspace';
+import FocusCard from '@/src/components/workspace/FocusCard';
+import InsightCard from '@/src/components/workspace/InsightCard';
+import WorkspaceGrid from '@/src/components/workspace/WorkspaceGrid';
 import { useAppStore } from '@/src/store';
-import { workspaceActions } from '../../../src/data/workspaceActions';
+import { getDueCards, getTodaysRecommendation } from '@/src/utils/studyEngine';
+import {
+  BookOpen,
+  Brain,
+  CalendarDays,
+  ChartColumn,
+  ClipboardList,
+  FolderOpen,
+  Sparkles,
+} from 'lucide-react-native';
 
 export default function SubjectWorkspaceScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const subjects = useAppStore((state) => state.subjects);
-  const allNotes = useAppStore((state) => state.notes);
+  const notes = useAppStore((state) => state.notes);
   const decks = useAppStore((state) => state.decks);
+  const flashcards = useAppStore((state) => state.flashcards);
+  const assessments = useAppStore((state) => state.assessments);
 
   const subject = subjects.find((item) => item.id === id);
 
   const subjectNotes = useMemo(
-    () => allNotes.filter((note) => note.subjectId === id),
-    [allNotes, id]
+    () => notes.filter((note) => note.subjectId === id),
+    [notes, id]
   );
 
   const subjectDecks = useMemo(
@@ -28,24 +42,70 @@ export default function SubjectWorkspaceScreen() {
     [decks, id]
   );
 
-  const recentNotes = subjectNotes.slice(-3).reverse();
+  const subjectCards = useMemo(
+    () => flashcards.filter((card) => card.subjectId === id),
+    [flashcards, id]
+  );
+
+  const subjectAssessments = useMemo(
+    () => assessments.filter((assessment) => assessment.subjectId === id),
+    [assessments, id]
+  );
+
+  const dueCards = useMemo(
+    () => getDueCards(subjectCards),
+    [subjectCards]
+  );
+
+  const recommendation = useMemo(
+    () =>
+      subject
+        ? getTodaysRecommendation([subject], subjectNotes, subjectCards)
+        : null,
+    [subject, subjectNotes, subjectCards]
+  );
+
+  const recentNote = subjectNotes.slice(-1)[0];
+
+  const workspaceSections = [
+    {
+      title: 'Study',
+      actions: [
+        { id: 'notes', title: 'Notes', icon: BookOpen },
+        { id: 'cards', title: 'Cards', icon: Brain },
+        { id: 'assessments', title: 'Assessments', icon: ClipboardList },
+      ],
+    },
+    {
+      title: 'Organise',
+      actions: [
+        { id: 'planner', title: 'Planner', icon: CalendarDays },
+        { id: 'files', title: 'Files', icon: FolderOpen },
+      ],
+    },
+    {
+      title: 'Insights',
+      actions: [
+        { id: 'higher', title: 'Higher', icon: Sparkles },
+        { id: 'progress', title: 'Progress', icon: ChartColumn },
+      ],
+    },
+  ];
 
   function handleActionPress(actionId: string) {
     if (!subject) return;
 
     switch (actionId) {
       case 'notes':
-        router.push({
-          pathname: '/subject/[id]/notes',
-          params: { id: subject.id },
-        } as never);
+        router.push(`/subject/${subject.id}/notes` as never);
         break;
 
       case 'cards':
-        router.push({
-          pathname: '/subject/[id]/flashcards',
-          params: { id: subject.id },
-        } as never);
+        router.push(`/subject/${subject.id}/flashcards` as never);
+        break;
+
+      case 'assessments':
+        router.push(`/subject/${subject.id}/assessments` as never);
         break;
 
       default:
@@ -68,6 +128,22 @@ export default function SubjectWorkspaceScreen() {
     );
   }
 
+  const focusTitle =
+    dueCards.length > 0
+      ? `${dueCards.length} flashcards due`
+      : recentNote
+        ? recentNote.title
+        : 'Start building this subject';
+
+  const focusSubtitle =
+    dueCards.length > 0
+      ? `Review your due cards for ${subject.name}. Estimated time: ${
+          recommendation?.estimatedMinutes ?? Math.max(dueCards.length * 2, 5)
+        } minutes.`
+      : recentNote
+        ? recentNote.content || 'Continue your most recent note.'
+        : 'Create notes, flashcards and assessments so Higher can guide your study.';
+
   return (
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -78,8 +154,18 @@ export default function SubjectWorkspaceScreen() {
         <WorkspaceHero
           code={subject.code}
           name={subject.name}
-          progress={subject.progress}
-          examText="Workspace ready"
+          progress={recommendation?.mastery ?? subject.progress}
+          examText={`${subjectAssessments.length} assessment${
+            subjectAssessments.length === 1 ? '' : 's'
+          }`}
+        />
+
+        <FocusCard
+          title={focusTitle}
+          subtitle={focusSubtitle}
+          progress={recommendation?.mastery ?? subject.progress}
+          buttonTitle={dueCards.length > 0 ? 'Start studying' : 'Continue'}
+         onPress={() => router.push('/session' as never)}
         />
 
         <View style={styles.statsRow}>
@@ -94,79 +180,32 @@ export default function SubjectWorkspaceScreen() {
           </View>
 
           <View style={styles.statBox}>
-            <Text style={styles.statNumber}>0</Text>
-            <Text style={styles.statLabel}>Tasks</Text>
+            <Text style={styles.statNumber}>{subjectAssessments.length}</Text>
+            <Text style={styles.statLabel}>Assessments</Text>
           </View>
         </View>
 
-        <Text style={styles.sectionLabel}>CONTINUE STUDYING</Text>
+        <WorkspaceGrid
+          sections={workspaceSections}
+          onActionPress={handleActionPress}
+        />
 
-        <Card>
-          <Text style={styles.label}>NEXT STEP</Text>
-          <Text style={styles.title}>
-            {recentNotes[0] ? recentNotes[0].title : 'Start your first note'}
-          </Text>
-          <Text numberOfLines={3} style={styles.body}>
-            {recentNotes[0]
-              ? recentNotes[0].content || 'Continue building this note.'
-              : 'Capture lecture notes, readings, tasks and ideas inside this subject.'}
-          </Text>
-        </Card>
-
-        <Text style={styles.sectionLabel}>RECENT NOTES</Text>
-
-        {recentNotes.length === 0 ? (
-          <Card>
-            <Text style={styles.label}>NO NOTES YET</Text>
-            <Text style={styles.body}>
-              Notes you create for this subject will appear here.
-            </Text>
-          </Card>
-        ) : (
-          recentNotes.map((note) => (
-            <Pressable
-              key={note.id}
-              style={styles.noteWrap}
-              onPress={() =>
-                router.push({
-                  pathname: '/subject/[id]/note/[noteId]',
-                  params: { id: subject.id, noteId: note.id },
-                } as never)
-              }
-            >
-              <Card>
-                <Text style={styles.noteTitle}>{note.title}</Text>
-                <Text numberOfLines={2} style={styles.body}>
-                  {note.content || 'No content yet'}
-                </Text>
-              </Card>
-            </Pressable>
-          ))
-        )}
-
-        <Text style={styles.sectionLabel}>QUICK ACCESS</Text>
-
-        <View style={styles.actionGrid}>
-          {workspaceActions.map((action) => (
-            <QuickActionCard
-              key={action.id}
-              title={action.title}
-              icon={action.icon}
-              onPress={() => handleActionPress(action.id)}
-            />
-          ))}
+        <View style={styles.insightWrap}>
+          <InsightCard
+            title="Higher is learning this subject."
+            body={
+              subjectNotes.length > 0 || subjectCards.length > 0
+                ? `You have ${subjectNotes.length} note${
+                    subjectNotes.length === 1 ? '' : 's'
+                  }, ${subjectCards.length} flashcard${
+                    subjectCards.length === 1 ? '' : 's'
+                  }, and ${dueCards.length} card${
+                    dueCards.length === 1 ? '' : 's'
+                  } due today.`
+                : 'Add notes and flashcards so Higher can start making smarter recommendations.'
+            }
+          />
         </View>
-
-        <Text style={styles.sectionLabel}>HIGHER RECOMMENDS</Text>
-
-        <Card>
-          <Text style={styles.label}>HIGHER</Text>
-          <Text style={styles.body}>
-            {subjectNotes.length > 0
-              ? `You have ${subjectNotes.length} note${subjectNotes.length === 1 ? '' : 's'} and ${subjectDecks.length} deck${subjectDecks.length === 1 ? '' : 's'} in this subject. Soon, Higher will use them to summarise, quiz you and generate flashcards.`
-              : 'Once notes are added, Higher will recommend what to study next.'}
-          </Text>
-        </Card>
 
         <View style={styles.bottomSpace} />
       </ScrollView>
@@ -182,13 +221,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colours.SAGE,
   },
-  sectionLabel: {
-    marginTop: 22,
-    marginBottom: 10,
-    fontSize: 11,
-    letterSpacing: 2,
-    color: Colours.STONE,
-  },
   label: {
     fontSize: 11,
     letterSpacing: 2,
@@ -201,52 +233,36 @@ const styles = StyleSheet.create({
     color: Colours.INK,
     marginBottom: 10,
   },
-  body: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: Colours.STONE,
-  },
   statsRow: {
     flexDirection: 'row',
     gap: 10,
-    marginBottom: 4,
+    marginTop: 18,
   },
   statBox: {
     flex: 1,
     backgroundColor: Colours.OFF,
     borderWidth: 1,
     borderColor: Colours.RULE,
-    borderRadius: 18,
+    borderRadius: 20,
     paddingVertical: 18,
     alignItems: 'center',
   },
   statNumber: {
     fontSize: 24,
-    fontWeight: '600',
+    fontWeight: '700',
     color: Colours.INK,
   },
   statLabel: {
     marginTop: 4,
-    fontSize: 11,
+    fontSize: 10,
     letterSpacing: 1,
     color: Colours.STONE,
     textTransform: 'uppercase',
   },
-  noteWrap: {
-    marginBottom: 12,
-  },
-  noteTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: Colours.INK,
-    marginBottom: 8,
-  },
-  actionGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
+  insightWrap: {
+    marginTop: 24,
   },
   bottomSpace: {
-    height: 40,
+    height: 48,
   },
 });

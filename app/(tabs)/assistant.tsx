@@ -1,4 +1,4 @@
-import { Colours } from '@/constants/colors';
+import { Colours } from '@/constants/colours';
 import { StyleSheet, Text, View } from 'react-native';
 
 export default function NotesScreen() {

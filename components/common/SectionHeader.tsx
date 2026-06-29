@@ -1,0 +1,49 @@
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+
+import { Colours } from '@/constants/colours';
+import { spacing, typography } from '@/src/theme';
+
+type SectionHeaderProps = {
+  title: string;
+  subtitle?: string;
+};
+
+export default function SectionHeader({
+  title,
+  subtitle,
+}: SectionHeaderProps) {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>{title}</Text>
+
+      {subtitle ? (
+        <Text style={styles.subtitle}>
+          {subtitle}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    marginTop: spacing.xl,
+    marginBottom: spacing.md,
+  },
+
+  title: {
+    fontSize: typography.overline,
+    fontWeight: '700',
+    letterSpacing: 2,
+    color: Colours.STONE,
+    textTransform: 'uppercase',
+  },
+
+  subtitle: {
+    marginTop: spacing.xs,
+    fontSize: typography.body,
+    color: Colours.STONE,
+    lineHeight: 22,
+  },
+});

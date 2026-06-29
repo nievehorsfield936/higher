@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import Card from '@/components/Card';
 import Header from '@/components/Header';
 import Screen from '@/components/Screen';
-import { Colours } from '@/constants/colors';
+import { Colours } from '@/constants/colours';
 
 export default function ProfileScreen() {
   return (

@@ -3,6 +3,7 @@ import {
     Brain,
     CalendarDays,
     ChartColumn,
+    ClipboardList,
     FolderOpen,
     Sparkles,
 } from 'lucide-react-native';
@@ -14,14 +15,19 @@ export const workspaceActions = [
     icon: BookOpen,
   },
   {
-    id: 'planner',
-    title: 'Planner',
-    icon: CalendarDays,
-  },
-  {
     id: 'cards',
     title: 'Cards',
     icon: Brain,
+  },
+  {
+    id: 'assessments',
+    title: 'Assessments',
+    icon: ClipboardList,
+  },
+  {
+    id: 'planner',
+    title: 'Planner',
+    icon: CalendarDays,
   },
   {
     id: 'files',

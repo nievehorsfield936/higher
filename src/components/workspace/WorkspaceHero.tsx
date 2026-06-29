@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { Colours } from '@/constants/colors';
+import { Colours } from '@/constants/colours';
 import ProgressBar from './ProgressBar';
 
 type Props = {

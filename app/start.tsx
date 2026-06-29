@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import React, { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
-import { Colours } from '@/constants/colors';
+import { Colours } from '@/constants/colours';
 import { useAppStore } from '@/src/store';
 
 export default function StartScreen() {

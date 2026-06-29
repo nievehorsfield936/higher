@@ -5,7 +5,7 @@ import {
     View,
 } from 'react-native';
 
-import { Colours } from '@/constants/colors';
+import { Colours } from '@/constants/colours';
 
 interface Stat {
   label: string;

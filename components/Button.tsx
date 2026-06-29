@@ -1,22 +1,41 @@
-import { Colours } from '@/constants/colors';
+import { Colours } from '@/constants/colours';
+import { radius, spacing, typography } from '@/src/theme';
 import React from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+} from 'react-native';
 
 type ButtonProps = {
   title: string;
   onPress?: () => void;
+  disabled?: boolean;
+  loading?: boolean;
 };
 
-export default function Button({ title, onPress }: ButtonProps) {
+export default function Button({
+  title,
+  onPress,
+  disabled = false,
+  loading = false,
+}: ButtonProps) {
   return (
     <Pressable
+      disabled={disabled || loading}
+      onPress={onPress}
       style={({ pressed }) => [
         styles.button,
-        pressed && styles.buttonPressed,
+        pressed && !disabled && !loading && styles.pressed,
+        disabled && styles.disabled,
       ]}
-      onPress={onPress}
     >
-      <Text style={styles.text}>{title}</Text>
+      {loading ? (
+        <ActivityIndicator color={Colours.INK} />
+      ) : (
+        <Text style={styles.text}>{title}</Text>
+      )}
     </Pressable>
   );
 }
@@ -24,18 +43,27 @@ export default function Button({ title, onPress }: ButtonProps) {
 const styles = StyleSheet.create({
   button: {
     backgroundColor: Colours.SAGE,
-    paddingVertical: 16,
-    borderRadius: 16,
+    minHeight: 56,
+    borderRadius: radius.lg,
+    justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
   },
 
-  buttonPressed: {
-    opacity: 0.85,
+  pressed: {
+    transform: [{ scale: 0.98 }],
+    opacity: 0.9,
+  },
+
+  disabled: {
+    opacity: 0.45,
   },
 
   text: {
     color: Colours.INK,
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: typography.body,
+    fontWeight: '700',
+    letterSpacing: 0.2,
   },
 });

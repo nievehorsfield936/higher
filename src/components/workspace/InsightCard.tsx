@@ -4,26 +4,17 @@ import { StyleSheet, Text } from 'react-native';
 import Card from '@/components/Card';
 import { Colours } from '@/constants/colours';
 
-interface CoachCardProps {
+type Props = {
   title: string;
-  subtitle: string;
-}
+  body: string;
+};
 
-export default function CoachCard({
-  title,
-  subtitle,
-}: CoachCardProps) {
+export default function InsightCard({ title, body }: Props) {
   return (
     <Card>
-      <Text style={styles.label}>HIGHER COACH</Text>
-
-      <Text style={styles.title}>
-        {title}
-      </Text>
-
-      <Text style={styles.subtitle}>
-        {subtitle}
-      </Text>
+      <Text style={styles.label}>HIGHER INSIGHT</Text>
+      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.body}>{body}</Text>
     </Card>
   );
 }
@@ -35,15 +26,13 @@ const styles = StyleSheet.create({
     color: Colours.STONE,
     marginBottom: 10,
   },
-
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '600',
     color: Colours.INK,
-    marginBottom: 10,
+    marginBottom: 8,
   },
-
-  subtitle: {
+  body: {
     fontSize: 15,
     lineHeight: 22,
     color: Colours.STONE,

@@ -1,4 +1,5 @@
-import { Colours } from '@/constants/colors';
+import { Colours } from '@/constants/colours';
+import { radius, spacing } from '@/src/theme';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
@@ -15,7 +16,15 @@ const styles = StyleSheet.create({
     backgroundColor: Colours.OFF,
     borderWidth: 1,
     borderColor: Colours.RULE,
-    borderRadius: 20,
-    padding: 24,
+    borderRadius: radius.xl,
+    padding: spacing.lg,
+    shadowColor: Colours.INK,
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+    elevation: 2,
   },
 });

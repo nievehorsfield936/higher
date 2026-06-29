@@ -2,7 +2,7 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import Card from '@/components/Card';
-import { Colours } from '@/constants/colors';
+import { Colours } from '@/constants/colours';
 import { Note } from '@/src/types/note';
 import { formatDate } from '@/src/utils/formatDate';
 

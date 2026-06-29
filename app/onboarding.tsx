@@ -5,7 +5,7 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import Button from '@/components/Button';
 import Card from '@/components/Card';
 import Screen from '@/components/Screen';
-import { Colours } from '@/constants/colors';
+import { Colours } from '@/constants/colours';
 
 export default function OnboardingScreen() {
   return (

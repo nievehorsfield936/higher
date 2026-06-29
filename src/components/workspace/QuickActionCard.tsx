@@ -2,7 +2,7 @@ import { LucideIcon } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
-import { Colours } from '@/constants/colors';
+import { Colours } from '@/constants/colours';
 
 type Props = {
   title: string;
@@ -26,17 +26,16 @@ export default function QuickActionCard({
 
 const styles = StyleSheet.create({
   card: {
-    flex: 1,
-    minWidth: '30%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colours.OFF,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: Colours.RULE,
-    paddingVertical: 24,
-    gap: 10,
-  },
+  width: '31%',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: Colours.OFF,
+  borderRadius: 18,
+  borderWidth: 1,
+  borderColor: Colours.RULE,
+  paddingVertical: 24,
+  gap: 10,
+},
   title: {
     fontSize: 13,
     fontWeight: '600',

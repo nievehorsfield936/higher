@@ -6,7 +6,7 @@ import Button from '@/components/Button';
 import Card from '@/components/Card';
 import Header from '@/components/Header';
 import Screen from '@/components/Screen';
-import { Colours } from '@/constants/colors';
+import { Colours } from '@/constants/colours';
 import { useAppStore } from '@/src/store';
 
 export default function DeckScreen() {

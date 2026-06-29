@@ -3,7 +3,7 @@ import { StyleSheet, Text } from 'react-native';
 
 import Header from '@/components/Header';
 import Screen from '@/components/Screen';
-import { Colours } from '@/constants/colors';
+import { Colours } from '@/constants/colours';
 
 export default function FlashcardsScreen() {
   return (
