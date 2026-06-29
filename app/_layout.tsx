@@ -32,13 +32,21 @@ export default function RootLayout() {
   }
 
   return (
-  <Stack screenOptions={{ headerShown: false }}>
+ <Stack screenOptions={{ headerShown: false }}>
   <Stack.Screen name="(tabs)" />
   <Stack.Screen name="onboarding" />
   <Stack.Screen name="create-subject" />
-<Stack.Screen name="subject/[id]/index" />
-<Stack.Screen name="subject/[id]/notes" />
-<Stack.Screen name="subject/[id]/new-note" />
+
+  <Stack.Screen name="subject/[id]/index" />
+  <Stack.Screen name="subject/[id]/notes" />
+  <Stack.Screen name="subject/[id]/new-note" />
+  <Stack.Screen name="subject/[id]/note/[noteId]" />
+
+  <Stack.Screen name="subject/[id]/flashcards" />
+  <Stack.Screen name="subject/[id]/new-deck" />
+  <Stack.Screen name="subject/[id]/deck/[deckId]" />
+  <Stack.Screen name="subject/[id]/deck/[deckId]/new-card" />
+  <Stack.Screen name="subject/[id]/deck/[deckId]/study" />
 </Stack>
   );
 }

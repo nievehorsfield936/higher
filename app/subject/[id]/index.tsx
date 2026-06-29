@@ -14,6 +14,7 @@ export default function SubjectWorkspaceScreen() {
 
   const subjects = useAppStore((state) => state.subjects);
   const allNotes = useAppStore((state) => state.notes);
+  const decks = useAppStore((state) => state.decks);
 
   const subject = subjects.find((item) => item.id === id);
 
@@ -22,7 +23,35 @@ export default function SubjectWorkspaceScreen() {
     [allNotes, id]
   );
 
+  const subjectDecks = useMemo(
+    () => decks.filter((deck) => deck.subjectId === id),
+    [decks, id]
+  );
+
   const recentNotes = subjectNotes.slice(-3).reverse();
+
+  function handleActionPress(actionId: string) {
+    if (!subject) return;
+
+    switch (actionId) {
+      case 'notes':
+        router.push({
+          pathname: '/subject/[id]/notes',
+          params: { id: subject.id },
+        } as never);
+        break;
+
+      case 'cards':
+        router.push({
+          pathname: '/subject/[id]/flashcards',
+          params: { id: subject.id },
+        } as never);
+        break;
+
+      default:
+        console.log(`${actionId} coming soon`);
+    }
+  }
 
   if (!subject) {
     return (
@@ -60,8 +89,8 @@ export default function SubjectWorkspaceScreen() {
           </View>
 
           <View style={styles.statBox}>
-            <Text style={styles.statNumber}>0</Text>
-            <Text style={styles.statLabel}>Cards</Text>
+            <Text style={styles.statNumber}>{subjectDecks.length}</Text>
+            <Text style={styles.statLabel}>Decks</Text>
           </View>
 
           <View style={styles.statBox}>
@@ -77,7 +106,7 @@ export default function SubjectWorkspaceScreen() {
           <Text style={styles.title}>
             {recentNotes[0] ? recentNotes[0].title : 'Start your first note'}
           </Text>
-          <Text style={styles.body}>
+          <Text numberOfLines={3} style={styles.body}>
             {recentNotes[0]
               ? recentNotes[0].content || 'Continue building this note.'
               : 'Capture lecture notes, readings, tasks and ideas inside this subject.'}
@@ -123,14 +152,7 @@ export default function SubjectWorkspaceScreen() {
               key={action.id}
               title={action.title}
               icon={action.icon}
-              onPress={() => {
-                if (action.id === 'notes') {
-                  router.push({
-                    pathname: '/subject/[id]/notes',
-                    params: { id: subject.id },
-                  } as never);
-                }
-              }}
+              onPress={() => handleActionPress(action.id)}
             />
           ))}
         </View>
@@ -141,7 +163,7 @@ export default function SubjectWorkspaceScreen() {
           <Text style={styles.label}>HIGHER</Text>
           <Text style={styles.body}>
             {subjectNotes.length > 0
-              ? `You have ${subjectNotes.length} note${subjectNotes.length === 1 ? '' : 's'} in this subject. Soon, Higher will use them to summarise, quiz you and generate flashcards.`
+              ? `You have ${subjectNotes.length} note${subjectNotes.length === 1 ? '' : 's'} and ${subjectDecks.length} deck${subjectDecks.length === 1 ? '' : 's'} in this subject. Soon, Higher will use them to summarise, quiz you and generate flashcards.`
               : 'Once notes are added, Higher will recommend what to study next.'}
           </Text>
         </Card>
