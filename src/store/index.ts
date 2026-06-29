@@ -3,6 +3,11 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import {
+    AssessmentSlice,
+    createAssessmentSlice,
+} from './slices/assessmentSlice';
+
+import {
     createFlashcardSlice,
     FlashcardSlice,
 } from './slices/flashcardSlice';
@@ -26,7 +31,8 @@ type AppStore =
   SubjectSlice &
   SettingsSlice &
   NoteSlice &
-  FlashcardSlice;
+  FlashcardSlice &
+  AssessmentSlice;
 
 export const useAppStore = create<AppStore>()(
   persist(
@@ -35,6 +41,7 @@ export const useAppStore = create<AppStore>()(
       ...createSettingsSlice(...a),
       ...createNoteSlice(...a),
       ...createFlashcardSlice(...a),
+      ...createAssessmentSlice(...a),
     }),
     {
       name: 'higher-art-store',
