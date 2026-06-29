@@ -25,6 +25,29 @@ export default function DeckScreen() {
     [flashcards, deckId]
   );
 
+  const studiedCards = cards.filter((card) => card.timesSeen > 0);
+
+  const totalSeen = cards.reduce(
+    (sum, card) => sum + card.timesSeen,
+    0
+  );
+
+  const totalCorrect = cards.reduce(
+    (sum, card) => sum + card.timesCorrect,
+    0
+  );
+
+  const accuracy =
+    totalSeen === 0
+      ? 0
+      : Math.round((totalCorrect / totalSeen) * 100);
+
+  const dueToday = cards.filter((card) => {
+    if (!card.nextReview) return true;
+
+    return new Date(card.nextReview) <= new Date();
+  });
+
   if (!deck) {
     return (
       <Screen>
@@ -42,55 +65,130 @@ export default function DeckScreen() {
 
         <Header
           title={deck.name}
-          subtitle={`${cards.length} card${cards.length === 1 ? '' : 's'}`}
+          subtitle={`${cards.length} card${
+            cards.length === 1 ? '' : 's'
+          }`}
         />
 
-        <View style={styles.buttonWrap}>
-         <Button
-  title="Study deck"
-  onPress={() =>
-    router.push(`/subject/${id}/deck/${deckId}/study` as never)
-  }
-/>
-  
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>
+              {cards.length}
+            </Text>
+
+            <Text style={styles.statLabel}>
+              Cards
+            </Text>
+          </View>
+
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>
+              {studiedCards.length}
+            </Text>
+
+            <Text style={styles.statLabel}>
+              Studied
+            </Text>
+          </View>
         </View>
 
-        <View style={styles.buttonWrap}>
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>
+              {accuracy}%
+            </Text>
+
+            <Text style={styles.statLabel}>
+              Accuracy
+            </Text>
+          </View>
+
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>
+              {dueToday.length}
+            </Text>
+
+            <Text style={styles.statLabel}>
+              Due Today
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.buttonSpacing}>
           <Button
-            title="New card"
+            title="Study Deck"
             onPress={() =>
-              router.push({
-                pathname: '/subject/[id]/deck/[deckId]/new-card',
-                params: {
-                  id,
-                  deckId,
-                },
-              } as never)
+              router.push(
+                `/subject/${id}/deck/${deckId}/study` as never
+              )
             }
           />
         </View>
 
+        <View style={styles.buttonSpacing}>
+          <Button
+            title="New Card"
+            onPress={() =>
+              router.push(
+                `/subject/${id}/deck/${deckId}/new-card` as never
+              )
+            }
+          />
+        </View>
+
+        <Text style={styles.sectionLabel}>
+          CARDS
+        </Text>
+
         {cards.length === 0 ? (
           <Card>
-            <Text style={styles.label}>NO CARDS YET</Text>
-            <Text style={styles.title}>Add your first card.</Text>
+            <Text style={styles.label}>
+              NO CARDS YET
+            </Text>
+
+            <Text style={styles.title}>
+              Add your first flashcard.
+            </Text>
+
             <Text style={styles.body}>
-              Create question and answer cards for active recall.
+              Create question and answer pairs to
+              begin studying.
             </Text>
           </Card>
         ) : (
-          cards.map((card) => (
-            <View key={card.id} style={styles.cardWrap}>
+          cards.map((card, index) => (
+            <View
+              key={card.id}
+              style={styles.cardSpacing}
+            >
               <Card>
-                <Text style={styles.label}>QUESTION</Text>
-                <Text style={styles.title}>{card.question}</Text>
+                <Text style={styles.label}>
+                  CARD {index + 1}
+                </Text>
 
-                <Text style={styles.label}>ANSWER</Text>
-                <Text style={styles.body}>{card.answer}</Text>
+                <Text style={styles.question}>
+                  {card.question}
+                </Text>
+
+                <Text style={styles.answer}>
+                  {card.answer}
+                </Text>
+
+                <View style={styles.metaRow}>
+                  <Text style={styles.meta}>
+                    Seen {card.timesSeen}
+                  </Text>
+
+                  <Text style={styles.meta}>
+                    Correct {card.timesCorrect}
+                  </Text>
+                </View>
               </Card>
             </View>
           ))
         )}
+
+        <View style={{ height: 40 }} />
       </ScrollView>
     </Screen>
   );
@@ -104,28 +202,94 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colours.SAGE,
   },
-  buttonWrap: {
+
+  statsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 12,
+  },
+
+  statCard: {
+    flex: 1,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: Colours.RULE,
+    backgroundColor: Colours.OFF,
+    paddingVertical: 20,
+    alignItems: 'center',
+  },
+
+  statNumber: {
+    fontSize: 30,
+    fontWeight: '700',
+    color: Colours.INK,
+  },
+
+  statLabel: {
+    marginTop: 6,
+    fontSize: 11,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+    color: Colours.STONE,
+  },
+
+  buttonSpacing: {
+    marginTop: 12,
+  },
+
+  sectionLabel: {
+    marginTop: 28,
+    marginBottom: 12,
+    fontSize: 11,
+    letterSpacing: 2,
+    color: Colours.STONE,
+  },
+
+  cardSpacing: {
     marginBottom: 14,
   },
+
   label: {
     fontSize: 11,
     letterSpacing: 2,
     color: Colours.STONE,
     marginBottom: 10,
-    marginTop: 6,
   },
+
   title: {
     fontSize: 22,
     fontWeight: '600',
     color: Colours.INK,
-    marginBottom: 16,
+    marginBottom: 10,
   },
+
   body: {
     fontSize: 15,
     lineHeight: 22,
     color: Colours.STONE,
   },
-  cardWrap: {
+
+  question: {
+    fontSize: 21,
+    fontWeight: '600',
+    color: Colours.INK,
     marginBottom: 14,
+  },
+
+  answer: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: Colours.STONE,
+    marginBottom: 18,
+  },
+
+  metaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+
+  meta: {
+    fontSize: 12,
+    color: Colours.STONE,
   },
 });
