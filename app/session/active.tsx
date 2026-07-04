@@ -25,6 +25,7 @@ export default function ActiveSessionScreen() {
   const notes = useAppStore((s) => s.notes);
   const flashcards = useAppStore((s) => s.flashcards);
   const assessments = useAppStore((s) => s.assessments);
+  const addCompletedSession = useAppStore((s) => s.addCompletedSession);
 
   const session = useMemo(
     () =>
@@ -47,6 +48,14 @@ export default function ActiveSessionScreen() {
 
   function completeStep() {
     if (!hasNextStep(runner)) {
+      addCompletedSession({
+        id: Date.now().toString(),
+        completedAt: new Date().toISOString(),
+        totalMinutes: session.totalMinutes,
+        stepsCompleted: session.steps.length,
+        preparation: session.preparation,
+      });
+
       router.replace('/session/complete' as never);
       return;
     }
@@ -63,19 +72,17 @@ export default function ActiveSessionScreen() {
 
         <Header
           title="Study Session"
-          subtitle={`Step ${runner.currentStep + 1} of ${runner.session.steps.length}`}
+          subtitle={`Step ${runner.currentStep + 1} of ${
+            runner.session.steps.length
+          }`}
         />
 
         <Card>
           <ProgressBar progress={progress} />
 
-          <Text style={styles.title}>
-            {step.title}
-          </Text>
+          <Text style={styles.title}>{step.title}</Text>
 
-          <Text style={styles.subtitle}>
-            {step.subtitle}
-          </Text>
+          <Text style={styles.subtitle}>{step.subtitle}</Text>
 
           <Text style={styles.time}>
             Estimated {step.estimatedMinutes} minutes
@@ -84,11 +91,7 @@ export default function ActiveSessionScreen() {
 
         <View style={styles.buttonWrap}>
           <Button
-            title={
-              hasNextStep(runner)
-                ? 'Complete Step'
-                : 'Finish Session'
-            }
+            title={hasNextStep(runner) ? 'Complete Step' : 'Finish Session'}
             onPress={completeStep}
           />
         </View>

@@ -6,36 +6,22 @@ import Button from '@/components/Button';
 import Card from '@/components/Card';
 import Header from '@/components/Header';
 import Screen from '@/components/Screen';
+import ProgressBar from '@/components/common/ProgressBar';
 import { Colours } from '@/constants/colours';
-import { getCoachMessage } from '@/src/services/studyCoach';
+import { useStudyBrain } from '@/src/hooks/useStudyBrain';
 import { useAppStore } from '@/src/store';
-import {
-  getDueCards,
-  getTodaysRecommendation,
-} from '@/src/utils/studyEngine';
+import { spacing, typography } from '@/src/theme';
 
 export default function HomeScreen() {
   const subjects = useAppStore((state) => state.subjects);
   const notes = useAppStore((state) => state.notes);
-  const decks = useAppStore((state) => state.decks);
   const flashcards = useAppStore((state) => state.flashcards);
+  const assessments = useAppStore((state) => state.assessments);
+  const completedSessions = useAppStore((state) => state.completedSessions);
 
   const currentSubject = subjects[0];
 
-  const dueCards = useMemo(
-    () => getDueCards(flashcards),
-    [flashcards]
-  );
-
-  const recommendation = useMemo(
-    () => getTodaysRecommendation(subjects, notes, flashcards),
-    [subjects, notes, flashcards]
-  );
-
-  const coach = useMemo(
-    () => getCoachMessage(recommendation),
-    [recommendation]
-  );
+  const brain = useStudyBrain();
 
   const recentNote = useMemo(() => {
     return [...notes].sort(
@@ -50,7 +36,7 @@ export default function HomeScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.logoWrap}>
           <Image
-           source={require('../../assets/branding/logo-full.png')}
+            source={require('../../assets/branding/logo-full.png')}
             style={styles.logo}
             resizeMode="contain"
           />
@@ -68,66 +54,60 @@ export default function HomeScreen() {
         {currentSubject ? (
           <>
             <Card>
-              <Text style={styles.cardLabel}>HIGHER COACH</Text>
-              <Text style={styles.cardTitle}>{coach.title}</Text>
-              <Text style={styles.cardBody}>{coach.subtitle}</Text>
+              <Text style={styles.cardLabel}>TODAY’S READINESS</Text>
+
+              <Text style={styles.readinessText}>
+                {brain.preparation}% ready
+              </Text>
+
+              <ProgressBar progress={brain.preparation} />
+
+              <Text style={styles.cardBody}>{brain.insight}</Text>
             </Card>
 
             <View style={styles.buttonWrap}>
               <Button
-                title={coach.action}
-                onPress={() =>
-                  router.push(
-                    `/subject/${recommendation?.subject.id ?? currentSubject.id}` as never
-                  )
-                }
+                title="Start today’s session"
+                onPress={() => router.push('/session')}
               />
             </View>
 
             <View style={styles.statsRow}>
               <View style={styles.statBox}>
-                <Text style={styles.statNumber}>{subjects.length}</Text>
-                <Text style={styles.statLabel}>Subjects</Text>
+                <Text style={styles.statNumber}>
+                  {brain.sessionsThisWeek}
+                </Text>
+                <Text style={styles.statLabel}>Sessions</Text>
               </View>
 
               <View style={styles.statBox}>
-                <Text style={styles.statNumber}>{notes.length}</Text>
-                <Text style={styles.statLabel}>Notes</Text>
+                <Text style={styles.statNumber}>
+                  {brain.studyMinutes}
+                </Text>
+                <Text style={styles.statLabel}>Minutes</Text>
               </View>
 
               <View style={styles.statBox}>
-                <Text style={styles.statNumber}>{dueCards.length}</Text>
+                <Text style={styles.statNumber}>{brain.dueCards}</Text>
                 <Text style={styles.statLabel}>Due</Text>
               </View>
             </View>
 
-            {recommendation ? (
-              <>
-                <Text style={styles.sectionLabel}>TODAY’S PRIORITY</Text>
+            <Text style={styles.sectionLabel}>NEXT ACTION</Text>
 
-                <Card>
-                  <Text style={styles.cardLabel}>
-                    {recommendation.subject.code}
-                  </Text>
+            <Card>
+              <Text style={styles.cardLabel}>
+                {brain.nextAction.type.toUpperCase()}
+              </Text>
 
-                  <Text style={styles.cardTitle}>
-                    {recommendation.subject.name}
-                  </Text>
+              <Text style={styles.cardTitle}>
+                {brain.nextAction.title}
+              </Text>
 
-                  <Text style={styles.cardBody}>
-                    {recommendation.dueCardsCount > 0
-                      ? `${recommendation.dueCardsCount} card${
-                          recommendation.dueCardsCount === 1 ? '' : 's'
-                        } due today. Accuracy is ${recommendation.accuracy}%. Estimated time: ${recommendation.estimatedMinutes} minutes.`
-                      : `${recommendation.notesCount} note${
-                          recommendation.notesCount === 1 ? '' : 's'
-                        } and ${recommendation.cardsCount} card${
-                          recommendation.cardsCount === 1 ? '' : 's'
-                        } in this subject. Mastery is ${recommendation.mastery}%.`}
-                  </Text>
-                </Card>
-              </>
-            ) : null}
+              <Text style={styles.cardBody}>
+                Suggested time: {brain.nextAction.duration} minutes.
+              </Text>
+            </Card>
 
             {recentNote ? (
               <>
@@ -149,26 +129,15 @@ export default function HomeScreen() {
               <Text style={styles.cardLabel}>{currentSubject.code}</Text>
               <Text style={styles.subjectName}>{currentSubject.name}</Text>
 
-              <View style={styles.progressTrack}>
-                <View
-                  style={[
-                    styles.progressFill,
-                    { width: `${currentSubject.progress}%` },
-                  ]}
-                />
-              </View>
-
               <Text style={styles.cardBody}>
-                Open your workspace to continue notes, flashcards and study planning.
+                Open your workspace to continue notes, flashcards and assessments.
               </Text>
             </Card>
 
             <View style={styles.buttonWrap}>
               <Button
-                title="Continue studying"
-                onPress={() =>
-                  router.push(`/subject/${currentSubject.id}` as never)
-                }
+                title="Open workspace"
+                onPress={() => router.push(`/subject/${currentSubject.id}`)}
               />
             </View>
           </>
@@ -200,84 +169,81 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   logoWrap: {
     alignItems: 'center',
-    marginTop: 18,
-    marginBottom: 4,
+    marginTop: spacing.md,
+    marginBottom: spacing.xs,
   },
   logo: {
     width: 120,
     height: 105,
   },
   sectionLabel: {
-    marginTop: 22,
-    marginBottom: 10,
-    fontSize: 11,
+    marginTop: spacing.xl,
+    marginBottom: spacing.md,
+    fontSize: typography.overline,
     letterSpacing: 2,
+    fontWeight: '700',
     color: Colours.STONE,
   },
   cardLabel: {
-    fontSize: 11,
+    fontSize: typography.overline,
     letterSpacing: 2,
     color: Colours.STONE,
-    marginBottom: 10,
+    marginBottom: spacing.sm,
   },
   cardTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+    fontSize: typography.h2,
+    fontWeight: '700',
     color: Colours.INK,
-    marginBottom: 10,
+    marginBottom: spacing.sm,
+  },
+  readinessText: {
+    fontSize: typography.display,
+    fontWeight: '700',
+    color: Colours.INK,
+    marginBottom: spacing.md,
   },
   subjectName: {
-    fontSize: 28,
-    fontWeight: '600',
+    fontSize: typography.h1,
+    fontWeight: '700',
     color: Colours.INK,
-    marginBottom: 18,
+    marginBottom: spacing.md,
   },
   cardBody: {
-    fontSize: 15,
-    lineHeight: 22,
+    marginTop: spacing.md,
+    fontSize: typography.body,
+    lineHeight: 24,
     color: Colours.STONE,
   },
   statsRow: {
     flexDirection: 'row',
     gap: 10,
-    marginTop: 16,
+    marginTop: spacing.lg,
   },
   statBox: {
     flex: 1,
     backgroundColor: Colours.OFF,
     borderWidth: 1,
     borderColor: Colours.RULE,
-    borderRadius: 18,
-    paddingVertical: 18,
+    borderRadius: 20,
+    paddingVertical: spacing.md,
     alignItems: 'center',
   },
   statNumber: {
-    fontSize: 24,
-    fontWeight: '600',
+    fontSize: typography.h2,
+    fontWeight: '700',
     color: Colours.INK,
   },
   statLabel: {
-    marginTop: 4,
-    fontSize: 11,
+    marginTop: spacing.xs,
+    fontSize: typography.overline,
     color: Colours.STONE,
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
-  progressTrack: {
-    height: 7,
-    backgroundColor: Colours.RULE,
-    borderRadius: 999,
-    overflow: 'hidden',
-    marginBottom: 14,
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: Colours.SAGE,
-  },
   buttonWrap: {
-    marginTop: 22,
+    marginTop: spacing.lg,
   },
   bottomSpace: {
-    height: 40,
+    height: spacing.xxl,
   },
 });

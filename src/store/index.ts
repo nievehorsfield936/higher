@@ -3,28 +3,33 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import {
-    AssessmentSlice,
-    createAssessmentSlice,
+  AssessmentSlice,
+  createAssessmentSlice,
 } from './slices/assessmentSlice';
 
 import {
-    createFlashcardSlice,
-    FlashcardSlice,
+  createFlashcardSlice,
+  FlashcardSlice,
 } from './slices/flashcardSlice';
 
 import {
-    createNoteSlice,
-    NoteSlice,
+  createNoteSlice,
+  NoteSlice,
 } from './slices/noteSlice';
 
 import {
-    createSettingsSlice,
-    SettingsSlice,
+  createSessionSlice,
+  SessionSlice,
+} from './slices/sessionSlice';
+
+import {
+  createSettingsSlice,
+  SettingsSlice,
 } from './slices/settingsSlice';
 
 import {
-    createSubjectSlice,
-    SubjectSlice,
+  createSubjectSlice,
+  SubjectSlice,
 } from './slices/subjectSlice';
 
 type AppStore =
@@ -32,7 +37,8 @@ type AppStore =
   SettingsSlice &
   NoteSlice &
   FlashcardSlice &
-  AssessmentSlice;
+  AssessmentSlice &
+  SessionSlice;
 
 export const useAppStore = create<AppStore>()(
   persist(
@@ -42,6 +48,7 @@ export const useAppStore = create<AppStore>()(
       ...createNoteSlice(...a),
       ...createFlashcardSlice(...a),
       ...createAssessmentSlice(...a),
+      ...createSessionSlice(...a),
     }),
     {
       name: 'higher-art-store',
