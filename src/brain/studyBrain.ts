@@ -2,6 +2,8 @@ import { getDashboardAnalytics } from '@/src/analytics';
 
 import { StudyBrain } from './types';
 
+import { getStudyStreak } from '@/src/analytics';
+
 type Subject = {
   id: string;
 };
@@ -31,6 +33,8 @@ export function buildStudyBrain({
     completedSessions,
   });
 
+  const streak = getStudyStreak(completedSessions);
+
   return {
     preparation: analytics.preparation,
 
@@ -51,6 +55,8 @@ export function buildStudyBrain({
 
     sessionsThisWeek: analytics.sessionsThisWeekCount,
 
+    streak,
+
     nextAction:
       analytics.dueCardsCount > 0
         ? {
@@ -65,10 +71,12 @@ export function buildStudyBrain({
           },
 
     insight:
-      analytics.preparation >= 80
-        ? 'You are on track this week.'
-        : analytics.dueCardsCount > 10
-        ? 'Your overdue flashcards are reducing your preparation.'
-        : 'Continue studying to improve your readiness.',
+  streak >= 7
+    ? `🔥 Amazing! You're on a ${streak}-day study streak.`
+    : analytics.dueCardsCount > 10
+    ? `You have ${analytics.dueCardsCount} overdue flashcards waiting.`
+    : analytics.preparation >= 80
+    ? 'You are well prepared this week.'
+    : 'Complete today’s study session to improve your readiness.',
   };
 }

@@ -6,8 +6,11 @@ import Button from '@/components/Button';
 import Card from '@/components/Card';
 import Header from '@/components/Header';
 import Screen from '@/components/Screen';
-import ProgressBar from '@/components/common/ProgressBar';
 import { Colours } from '@/constants/colours';
+import ActionCard from '@/src/components/ui/ActionCard';
+import HeroCard from '@/src/components/ui/HeroCard';
+import InsightCard from '@/src/components/ui/InsightCard';
+import MetricCard from '@/src/components/ui/MetricCard';
 import { useStudyBrain } from '@/src/hooks/useStudyBrain';
 import { useAppStore } from '@/src/store';
 import { spacing, typography } from '@/src/theme';
@@ -15,12 +18,8 @@ import { spacing, typography } from '@/src/theme';
 export default function HomeScreen() {
   const subjects = useAppStore((state) => state.subjects);
   const notes = useAppStore((state) => state.notes);
-  const flashcards = useAppStore((state) => state.flashcards);
-  const assessments = useAppStore((state) => state.assessments);
-  const completedSessions = useAppStore((state) => state.completedSessions);
 
   const currentSubject = subjects[0];
-
   const brain = useStudyBrain();
 
   const recentNote = useMemo(() => {
@@ -53,17 +52,11 @@ export default function HomeScreen() {
 
         {currentSubject ? (
           <>
-            <Card>
-              <Text style={styles.cardLabel}>TODAY’S READINESS</Text>
-
-              <Text style={styles.readinessText}>
-                {brain.preparation}% ready
-              </Text>
-
-              <ProgressBar progress={brain.preparation} />
-
-              <Text style={styles.cardBody}>{brain.insight}</Text>
-            </Card>
+            <HeroCard
+              streak={brain.streak}
+              preparation={brain.preparation}
+              insight={brain.insight}
+            />
 
             <View style={styles.buttonWrap}>
               <Button
@@ -72,42 +65,41 @@ export default function HomeScreen() {
               />
             </View>
 
-            <View style={styles.statsRow}>
-              <View style={styles.statBox}>
-                <Text style={styles.statNumber}>
-                  {brain.sessionsThisWeek}
-                </Text>
-                <Text style={styles.statLabel}>Sessions</Text>
-              </View>
+            <View style={styles.metricGrid}>
+              <MetricCard
+                label="SESSIONS"
+                value={`${brain.sessionsThisWeek}`}
+                subtitle="This week"
+              />
 
-              <View style={styles.statBox}>
-                <Text style={styles.statNumber}>
-                  {brain.studyMinutes}
-                </Text>
-                <Text style={styles.statLabel}>Minutes</Text>
-              </View>
+              <MetricCard
+                label="STUDY TIME"
+                value={`${brain.studyMinutes}`}
+                subtitle="Minutes"
+              />
+            </View>
 
-              <View style={styles.statBox}>
-                <Text style={styles.statNumber}>{brain.dueCards}</Text>
-                <Text style={styles.statLabel}>Due</Text>
-              </View>
+            <View style={styles.metricSingle}>
+              <MetricCard
+                label="DUE CARDS"
+                value={`${brain.dueCards}`}
+                subtitle="Ready for review"
+              />
             </View>
 
             <Text style={styles.sectionLabel}>NEXT ACTION</Text>
 
-            <Card>
-              <Text style={styles.cardLabel}>
-                {brain.nextAction.type.toUpperCase()}
-              </Text>
+            <ActionCard
+              title={brain.nextAction.title}
+              duration={brain.nextAction.duration}
+            />
 
-              <Text style={styles.cardTitle}>
-                {brain.nextAction.title}
-              </Text>
+            <Text style={styles.sectionLabel}>HIGHER INSIGHT</Text>
 
-              <Text style={styles.cardBody}>
-                Suggested time: {brain.nextAction.duration} minutes.
-              </Text>
-            </Card>
+            <InsightCard
+              title="Today’s focus"
+              body={brain.insight}
+            />
 
             {recentNote ? (
               <>
@@ -184,6 +176,14 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colours.STONE,
   },
+  metricGrid: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: spacing.lg,
+  },
+  metricSingle: {
+    marginTop: spacing.md,
+  },
   cardLabel: {
     fontSize: typography.overline,
     letterSpacing: 2,
@@ -196,12 +196,6 @@ const styles = StyleSheet.create({
     color: Colours.INK,
     marginBottom: spacing.sm,
   },
-  readinessText: {
-    fontSize: typography.display,
-    fontWeight: '700',
-    color: Colours.INK,
-    marginBottom: spacing.md,
-  },
   subjectName: {
     fontSize: typography.h1,
     fontWeight: '700',
@@ -213,32 +207,6 @@ const styles = StyleSheet.create({
     fontSize: typography.body,
     lineHeight: 24,
     color: Colours.STONE,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: spacing.lg,
-  },
-  statBox: {
-    flex: 1,
-    backgroundColor: Colours.OFF,
-    borderWidth: 1,
-    borderColor: Colours.RULE,
-    borderRadius: 20,
-    paddingVertical: spacing.md,
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: typography.h2,
-    fontWeight: '700',
-    color: Colours.INK,
-  },
-  statLabel: {
-    marginTop: spacing.xs,
-    fontSize: typography.overline,
-    color: Colours.STONE,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
   },
   buttonWrap: {
     marginTop: spacing.lg,

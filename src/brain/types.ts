@@ -12,6 +12,8 @@ export interface StudyBrain {
 
   sessionsThisWeek: number;
 
+  streak: number;
+
   nextAction: {
     type: 'notes' | 'flashcards' | 'assessment';
     title: string;
