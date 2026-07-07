@@ -1,210 +1,111 @@
-import React, { useMemo } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { ScrollView, StyleSheet } from 'react-native';
 
-import Card from '@/components/Card';
-import Header from '@/components/Header';
 import Screen from '@/components/Screen';
-import ProgressBar from '@/components/common/ProgressBar';
-import { Colours } from '@/constants/colours';
-import {
-  getDueCards,
-  getTodaysRecommendation,
-} from '@/src/utils/studyEngine';
-import {
-  getPreparationScore,
-  getSessionsThisWeek,
-  getTotalStudyMinutes,
-} from '@/src/analytics';
-import { useAppStore } from '@/src/store';
-import { spacing, typography } from '@/src/theme';
+import DashboardHero from '@/src/components/ui/DashboardHero';
+import GoalCard from '@/src/components/ui/GoalCard';
+import InsightCard from '@/src/components/ui/InsightCard';
+import ProgressScoreCard from '@/src/components/ui/ProgressScoreCard';
+import ScoreRow from '@/src/components/ui/ScoreRow';
+import SectionHeader from '@/src/components/ui/SectionHeader';
+import StatGrid from '@/src/components/ui/StatGrid';
+import { useStudyBrain } from '@/src/hooks/useStudyBrain';
+import { spacing } from '@/src/theme';
 
 export default function TrackerScreen() {
-  const subjects = useAppStore((state) => state.subjects);
-  const notes = useAppStore((state) => state.notes);
-  const flashcards = useAppStore((state) => state.flashcards);
-  const assessments = useAppStore((state) => state.assessments);
-  const completedSessions = useAppStore((state) => state.completedSessions);
-
-  const currentSubject = subjects[0];
-
-  const dueCards = useMemo(
-    () => getDueCards(flashcards),
-    [flashcards]
-  );
-
-  const sessionsThisWeek = useMemo(
-    () => getSessionsThisWeek(completedSessions),
-    [completedSessions]
-  );
-
-  const totalStudyMinutes = useMemo(
-    () => getTotalStudyMinutes(completedSessions),
-    [completedSessions]
-  );
-
-  const recommendation = useMemo(
-    () => getTodaysRecommendation(subjects, notes, flashcards),
-    [subjects, notes, flashcards]
-  );
-
-  const preparation = useMemo(() => {
-    if (!currentSubject) return 0;
-
-    return getPreparationScore({
-      subjectId: currentSubject.id,
-      notes,
-      flashcards,
-      assessments,
-      completedSessions,
-    });
-  }, [currentSubject, notes, flashcards, assessments, completedSessions]);
+  const brain = useStudyBrain();
 
   return (
     <Screen>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <Header
-          title="Progress"
-          subtitle="Track your study rhythm and preparation."
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
+      >
+        <DashboardHero
+          greeting="Your progress"
+          streak={brain.streak}
+          preparation={brain.preparation}
+          progressLabel="Overall readiness"
         />
 
-        <Card>
-          <Text style={styles.label}>PREPARATION</Text>
-          <Text style={styles.bigNumber}>{preparation}%</Text>
-          <ProgressBar progress={preparation} />
-          <Text style={styles.body}>
-            Your readiness score is based on notes, flashcards, assessments and completed sessions.
-          </Text>
-        </Card>
+        <ProgressScoreCard
+          score={brain.preparation}
+          subtitle="Your readiness is calculated from study consistency, notes, flashcards and assessments."
+        />
 
-        <View style={styles.statsRow}>
-          <View style={styles.statBox}>
-            <Text style={styles.statNumber}>{sessionsThisWeek.length}</Text>
-            <Text style={styles.statLabel}>Sessions</Text>
-          </View>
+        <SectionHeader title="This Week" />
 
-          <View style={styles.statBox}>
-            <Text style={styles.statNumber}>{totalStudyMinutes}</Text>
-            <Text style={styles.statLabel}>Minutes</Text>
-          </View>
+        <StatGrid
+          stats={[
+            {
+              label: 'Sessions',
+              value: brain.sessionsThisWeek,
+            },
+            {
+              label: 'Minutes',
+              value: brain.studyMinutes,
+            },
+            {
+              label: 'Due',
+              value: brain.dueCards,
+            },
+          ]}
+        />
 
-          <View style={styles.statBox}>
-            <Text style={styles.statNumber}>{dueCards.length}</Text>
-            <Text style={styles.statLabel}>Due</Text>
-          </View>
-        </View>
+        <SectionHeader title="Study Health" />
 
-        {recommendation ? (
-          <>
-            <Text style={styles.sectionLabel}>CURRENT FOCUS</Text>
+        <ScoreRow
+          label="Notes"
+          value={brain.notesScore}
+        />
 
-            <Card>
-              <Text style={styles.label}>{recommendation.subject.code}</Text>
-              <Text style={styles.title}>{recommendation.subject.name}</Text>
-              <Text style={styles.body}>
-                {recommendation.dueCardsCount} cards due · {recommendation.accuracy}% accuracy · {recommendation.estimatedMinutes} min suggested
-              </Text>
-            </Card>
-          </>
-        ) : null}
+        <ScoreRow
+          label="Flashcards"
+          value={brain.flashcardsScore}
+        />
 
-        <Text style={styles.sectionLabel}>RECENT SESSIONS</Text>
+        <ScoreRow
+          label="Assessments"
+          value={brain.assessmentScore}
+        />
 
-        {completedSessions.length === 0 ? (
-          <Card>
-            <Text style={styles.title}>No sessions yet.</Text>
-            <Text style={styles.body}>
-              Complete your first guided session to start building progress history.
-            </Text>
-          </Card>
-        ) : (
-          completedSessions.slice(0, 5).map((session) => (
-            <View key={session.id} style={styles.sessionWrap}>
-              <Card>
-                <Text style={styles.label}>
-                  {new Date(session.completedAt).toLocaleDateString()}
-                </Text>
+        <ScoreRow
+          label="Consistency"
+          value={brain.consistencyScore}
+        />
 
-                <Text style={styles.title}>
-                  {session.totalMinutes} minutes studied
-                </Text>
+        <SectionHeader title="Higher Insight" />
 
-                <Text style={styles.body}>
-                  {session.stepsCompleted} step{session.stepsCompleted === 1 ? '' : 's'} completed · {session.preparation}% preparation
-                </Text>
-              </Card>
-            </View>
-          ))
-        )}
+        <InsightCard
+          title="Your trajectory"
+          body={brain.insight}
+        />
 
-        <View style={styles.bottomSpace} />
+        <SectionHeader title="Goals" />
+
+        <GoalCard
+          goals={[
+            {
+              label: 'Study 5 days this week',
+              done: brain.sessionsThisWeek >= 5,
+            },
+            {
+              label: 'Maintain your study streak',
+              done: brain.streak >= 7,
+            },
+            {
+              label: 'Clear all due flashcards',
+              done: brain.dueCards === 0,
+            },
+          ]}
+        />
       </ScrollView>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  label: {
-    fontSize: typography.overline,
-    letterSpacing: 2,
-    color: Colours.STONE,
-    marginBottom: spacing.sm,
-  },
-  bigNumber: {
-    fontSize: typography.display,
-    fontWeight: '700',
-    color: Colours.INK,
-    marginBottom: spacing.md,
-  },
-  body: {
-    marginTop: spacing.md,
-    fontSize: typography.body,
-    lineHeight: 24,
-    color: Colours.STONE,
-  },
-  title: {
-    fontSize: typography.h2,
-    fontWeight: '700',
-    color: Colours.INK,
-    marginBottom: spacing.sm,
-  },
-  sectionLabel: {
-    marginTop: spacing.xl,
-    marginBottom: spacing.md,
-    fontSize: typography.overline,
-    letterSpacing: 2,
-    fontWeight: '700',
-    color: Colours.STONE,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: spacing.lg,
-  },
-  statBox: {
-    flex: 1,
-    backgroundColor: Colours.OFF,
-    borderWidth: 1,
-    borderColor: Colours.RULE,
-    borderRadius: 20,
-    paddingVertical: spacing.md,
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: typography.h2,
-    fontWeight: '700',
-    color: Colours.INK,
-  },
-  statLabel: {
-    marginTop: spacing.xs,
-    fontSize: typography.overline,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    color: Colours.STONE,
-  },
-  sessionWrap: {
-    marginBottom: spacing.md,
-  },
-  bottomSpace: {
-    height: spacing.xxl,
+  content: {
+    paddingBottom: spacing.xxxl,
   },
 });
