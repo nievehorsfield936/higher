@@ -1,16 +1,17 @@
 import { router } from 'expo-router';
 import React, { useMemo } from 'react';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text } from 'react-native';
 
-import Button from '@/components/Button';
 import Card from '@/components/Card';
-import Header from '@/components/Header';
 import Screen from '@/components/Screen';
 import { Colours } from '@/constants/colours';
-import ActionCard from '@/src/components/ui/ActionCard';
-import HeroCard from '@/src/components/ui/HeroCard';
+import ContinueStudyCard from '@/src/components/ui/ContinueStudyCard';
+import DashboardHero from '@/src/components/ui/DashboardHero';
+import EmptyState from '@/src/components/ui/EmptyState';
 import InsightCard from '@/src/components/ui/InsightCard';
-import MetricCard from '@/src/components/ui/MetricCard';
+import SectionHeader from '@/src/components/ui/SectionHeader';
+import StatGrid from '@/src/components/ui/StatGrid';
+import SubjectSummaryCard from '@/src/components/ui/SubjectSummaryCard';
 import { useStudyBrain } from '@/src/hooks/useStudyBrain';
 import { useAppStore } from '@/src/store';
 import { spacing, typography } from '@/src/theme';
@@ -33,77 +34,47 @@ export default function HomeScreen() {
   return (
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.logoWrap}>
-          <Image
-            source={require('../../assets/branding/logo-full.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-        </View>
-
-        <Header
-          title="Good morning."
-          subtitle={
-            currentSubject
-              ? 'Higher has your study plan ready.'
-              : 'Create your first subject to begin.'
-          }
+        <DashboardHero
+          greeting="Good morning."
+          streak={brain.streak}
+          preparation={brain.preparation}
         />
 
         {currentSubject ? (
           <>
-            <HeroCard
-              streak={brain.streak}
-              preparation={brain.preparation}
-              insight={brain.insight}
-            />
-
-            <View style={styles.buttonWrap}>
-              <Button
-                title="Start today’s session"
-                onPress={() => router.push('/session')}
-              />
-            </View>
-
-            <View style={styles.metricGrid}>
-              <MetricCard
-                label="SESSIONS"
-                value={`${brain.sessionsThisWeek}`}
-                subtitle="This week"
-              />
-
-              <MetricCard
-                label="STUDY TIME"
-                value={`${brain.studyMinutes}`}
-                subtitle="Minutes"
-              />
-            </View>
-
-            <View style={styles.metricSingle}>
-              <MetricCard
-                label="DUE CARDS"
-                value={`${brain.dueCards}`}
-                subtitle="Ready for review"
-              />
-            </View>
-
-            <Text style={styles.sectionLabel}>NEXT ACTION</Text>
-
-            <ActionCard
+            <ContinueStudyCard
+              subject={currentSubject.name}
               title={brain.nextAction.title}
-              duration={brain.nextAction.duration}
+              meta={`${brain.nextAction.duration} min session`}
+              onPress={() => router.push('/session')}
             />
 
-            <Text style={styles.sectionLabel}>HIGHER INSIGHT</Text>
+            <SectionHeader title="This Week" />
 
-            <InsightCard
-              title="Today’s focus"
-              body={brain.insight}
+            <StatGrid
+              stats={[
+                {
+                  label: 'Sessions',
+                  value: brain.sessionsThisWeek,
+                },
+                {
+                  label: 'Minutes',
+                  value: brain.studyMinutes,
+                },
+                {
+                  label: 'Due',
+                  value: brain.dueCards,
+                },
+              ]}
             />
+
+            <SectionHeader title="Higher Insight" />
+
+            <InsightCard title="Today’s focus" body={brain.insight} />
 
             {recentNote ? (
               <>
-                <Text style={styles.sectionLabel}>CONTINUE</Text>
+                <SectionHeader title="Continue" />
 
                 <Card>
                   <Text style={styles.cardLabel}>RECENT NOTE</Text>
@@ -115,75 +86,28 @@ export default function HomeScreen() {
               </>
             ) : null}
 
-            <Text style={styles.sectionLabel}>CURRENT SUBJECT</Text>
+            <SectionHeader title="Current Subject" />
 
-            <Card>
-              <Text style={styles.cardLabel}>{currentSubject.code}</Text>
-              <Text style={styles.subjectName}>{currentSubject.name}</Text>
-
-              <Text style={styles.cardBody}>
-                Open your workspace to continue notes, flashcards and assessments.
-              </Text>
-            </Card>
-
-            <View style={styles.buttonWrap}>
-              <Button
-                title="Open workspace"
-                onPress={() => router.push(`/subject/${currentSubject.id}`)}
-              />
-            </View>
+            <SubjectSummaryCard
+              code={currentSubject.code}
+              name={currentSubject.name}
+              preparation={brain.preparation}
+            />
           </>
         ) : (
-          <>
-            <Card>
-              <Text style={styles.cardLabel}>EMPTY WORKSPACE</Text>
-              <Text style={styles.cardTitle}>No subjects yet</Text>
-              <Text style={styles.cardBody}>
-                Create your first subject to build your study workspace.
-              </Text>
-            </Card>
-
-            <View style={styles.buttonWrap}>
-              <Button
-                title="Create subject"
-                onPress={() => router.push('/create-subject')}
-              />
-            </View>
-          </>
+          <EmptyState
+            title="No subjects yet"
+            body="Create your first subject to build your study workspace."
+          />
         )}
 
-        <View style={styles.bottomSpace} />
+        <Text style={styles.bottomSpace} />
       </ScrollView>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  logoWrap: {
-    alignItems: 'center',
-    marginTop: spacing.md,
-    marginBottom: spacing.xs,
-  },
-  logo: {
-    width: 120,
-    height: 105,
-  },
-  sectionLabel: {
-    marginTop: spacing.xl,
-    marginBottom: spacing.md,
-    fontSize: typography.overline,
-    letterSpacing: 2,
-    fontWeight: '700',
-    color: Colours.STONE,
-  },
-  metricGrid: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: spacing.lg,
-  },
-  metricSingle: {
-    marginTop: spacing.md,
-  },
   cardLabel: {
     fontSize: typography.overline,
     letterSpacing: 2,
@@ -196,20 +120,11 @@ const styles = StyleSheet.create({
     color: Colours.INK,
     marginBottom: spacing.sm,
   },
-  subjectName: {
-    fontSize: typography.h1,
-    fontWeight: '700',
-    color: Colours.INK,
-    marginBottom: spacing.md,
-  },
   cardBody: {
     marginTop: spacing.md,
     fontSize: typography.body,
     lineHeight: 24,
     color: Colours.STONE,
-  },
-  buttonWrap: {
-    marginTop: spacing.lg,
   },
   bottomSpace: {
     height: spacing.xxl,
