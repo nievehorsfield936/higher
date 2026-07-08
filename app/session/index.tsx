@@ -4,11 +4,12 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import Button from '@/components/Button';
 import Card from '@/components/Card';
-import Header from '@/components/Header';
 import Screen from '@/components/Screen';
-import ProgressBar from '@/components/common/ProgressBar';
+import ProgressScoreCard from '@/src/components/ui/ProgressScoreCard';
+import SectionHeader from '@/src/components/ui/SectionHeader';
 import { Colours } from '@/constants/colours';
-import { buildStudySession } from '@/src/session';
+import { buildSmartStudySession } from '@/src/session';
+import { useStudyBrain } from '@/src/hooks/useStudyBrain';
 import { useAppStore } from '@/src/store';
 import { spacing, typography } from '@/src/theme';
 
@@ -17,9 +18,11 @@ export default function SessionScreen() {
   const flashcards = useAppStore((state) => state.flashcards);
   const assessments = useAppStore((state) => state.assessments);
 
+  const brain = useStudyBrain();
+
   const session = useMemo(
     () =>
-      buildStudySession({
+      buildSmartStudySession({
         notes,
         flashcards,
         assessments,
@@ -34,30 +37,28 @@ export default function SessionScreen() {
           <Text style={styles.backText}>← Back</Text>
         </Pressable>
 
-        <Header
-          title="Today’s Session"
-          subtitle={`${session.totalMinutes} minutes planned`}
+        <Text style={styles.label}>TODAY’S SESSION</Text>
+
+        <Text style={styles.heading}>
+          Higher has built your study plan.
+        </Text>
+
+        <ProgressScoreCard
+          score={brain.preparation}
+          subtitle={`${session.totalMinutes} minutes planned from your notes, flashcards and assessments.`}
         />
 
-        <Card>
-          <Text style={styles.label}>PREPARATION</Text>
-          <Text style={styles.prepText}>{session.preparation}% ready</Text>
-
-          <ProgressBar progress={session.preparation} />
-
-          <Text style={styles.body}>
-            Higher has built this session from your notes, flashcards and assessments.
-          </Text>
-        </Card>
-
-        <Text style={styles.sectionLabel}>SESSION STEPS</Text>
+        <SectionHeader title="Session Flow" />
 
         {session.steps.map((step, index) => (
-          <View key={step.id} style={styles.stepWrap}>
+          <View key={`${step.id}-${index}`} style={styles.stepWrap}>
             <Card>
-              <Text style={styles.label}>STEP {index + 1}</Text>
+              <Text style={styles.stepNumber}>STEP {index + 1}</Text>
+
               <Text style={styles.title}>{step.title}</Text>
+
               <Text style={styles.body}>{step.subtitle}</Text>
+
               <Text style={styles.meta}>
                 Estimated {step.estimatedMinutes} min
               </Text>
@@ -66,10 +67,10 @@ export default function SessionScreen() {
         ))}
 
         <View style={styles.buttonWrap}>
-         <Button
-  title="Start Session"
-  onPress={() => router.push('/session/active')}
-/>
+          <Button
+            title="Start Session"
+            onPress={() => router.push('/session/active')}
+          />
         </View>
 
         <View style={styles.bottomSpace} />
@@ -81,7 +82,7 @@ export default function SessionScreen() {
 const styles = StyleSheet.create({
   backText: {
     marginTop: spacing.md,
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
     fontSize: typography.body,
     fontWeight: '700',
     color: Colours.SAGE,
@@ -92,34 +93,32 @@ const styles = StyleSheet.create({
     color: Colours.STONE,
     marginBottom: spacing.sm,
   },
-  prepText: {
-    fontSize: typography.h1,
-    fontWeight: '700',
+  heading: {
+    fontFamily: 'PlayfairDisplay_500Medium',
+    fontSize: 34,
+    lineHeight: 40,
     color: Colours.INK,
-    marginBottom: spacing.md,
-  },
-  body: {
-    marginTop: spacing.md,
-    fontSize: typography.body,
-    lineHeight: 24,
-    color: Colours.STONE,
-  },
-  sectionLabel: {
-    marginTop: spacing.xl,
-    marginBottom: spacing.md,
-    fontSize: typography.overline,
-    letterSpacing: 2,
-    fontWeight: '700',
-    color: Colours.STONE,
+    marginBottom: spacing.xl,
   },
   stepWrap: {
     marginBottom: spacing.md,
+  },
+  stepNumber: {
+    fontSize: typography.overline,
+    letterSpacing: 2,
+    color: Colours.STONE,
+    marginBottom: spacing.sm,
   },
   title: {
     fontSize: typography.h2,
     fontWeight: '700',
     color: Colours.INK,
     marginBottom: spacing.sm,
+  },
+  body: {
+    fontSize: typography.body,
+    lineHeight: 24,
+    color: Colours.STONE,
   },
   meta: {
     marginTop: spacing.md,

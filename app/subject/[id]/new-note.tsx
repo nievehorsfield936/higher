@@ -14,8 +14,9 @@ import {
 import Button from '@/components/Button';
 import Card from '@/components/Card';
 import Screen from '@/components/Screen';
-import InsightCard from '@/src/components/ui/InsightCard';
 import AIActionBar from '@/src/components/editor/AIActionBar';
+import StudyQualityCard from '@/src/components/editor/StudyQualityCard';
+import InsightCard from '@/src/components/ui/InsightCard';
 import SectionHeader from '@/src/components/ui/SectionHeader';
 import { Colours } from '@/constants/colours';
 import { useAppStore } from '@/src/store';
@@ -29,6 +30,13 @@ export default function NewNoteScreen() {
   const [content, setContent] = useState('');
 
   const canSave = title.trim().length > 0;
+
+  const wordCount =
+    content.trim().length === 0
+      ? 0
+      : content.trim().split(/\s+/).length;
+
+  const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 
   function handleSave() {
     if (!canSave) return;
@@ -69,45 +77,34 @@ export default function NewNoteScreen() {
           />
 
           <Card>
+            <Text style={styles.editorLabel}>NOTE BODY</Text>
 
-  <Text style={styles.editorLabel}>NOTE BODY</Text>
+            <TextInput
+              value={content}
+              onChangeText={setContent}
+              placeholder="Start writing your lecture notes..."
+              placeholderTextColor={Colours.STONE}
+              multiline
+              textAlignVertical="top"
+              style={styles.bodyInput}
+            />
 
-  <EditorToolbar />
+            <View style={styles.editorFooter}>
+              <Text style={styles.footerText}>{wordCount} words</Text>
+              <Text style={styles.footerText}>{readingTime} min read</Text>
+            </View>
+          </Card>
 
-  <TextInput
-    value={content}
-    onChangeText={setContent}
-    placeholder="Start writing your lecture notes..."
-    placeholderTextColor={Colours.STONE}
-    multiline
-    textAlignVertical="top"
-    style={styles.bodyInput}
-  />
+          <View style={styles.aiWrap}>
+            <AIActionBar />
+          </View>
 
-  <View style={styles.editorFooter}>
-    <Text style={styles.footerText}>
-      {content.trim().length === 0
-        ? '0 words'
-        : `${content.trim().split(/\s+/).length} words`}
-    </Text>
-
-    <Text style={styles.footerText}>
-      {Math.max(
-        1,
-        Math.ceil(
-          content.trim().split(/\s+/).length / 200
-        )
-      )} min read
-    </Text>
-
-  </View>
-
-</Card>
+          <View style={styles.qualityWrap}>
+            <StudyQualityCard title={title} content={content} />
+          </View>
 
           <SectionHeader title="Higher Tools" />
-<View style={styles.aiWrap}>
-  <AIActionBar />
-</View>
+
           <InsightCard
             title="AI tools coming soon"
             body="Soon, Higher will summarise notes, generate flashcards and create quiz questions from this editor."
@@ -164,27 +161,28 @@ const styles = StyleSheet.create({
     lineHeight: 26,
     color: Colours.INK,
   },
+  editorFooter: {
+    marginTop: spacing.lg,
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: Colours.RULE,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  footerText: {
+    color: Colours.STONE,
+    fontSize: typography.caption,
+  },
+  aiWrap: {
+    marginTop: spacing.md,
+  },
+  qualityWrap: {
+    marginTop: spacing.md,
+  },
   buttonWrap: {
     marginTop: spacing.xl,
   },
   bottomSpace: {
     height: spacing.xxl,
   },
-  editorFooter: {
-  marginTop: spacing.lg,
-  paddingTop: spacing.md,
-  borderTopWidth: 1,
-  borderTopColor: Colours.RULE,
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-},
-
-aiWrap: {
-  marginTop: spacing.md,
-},
-
-footerText: {
-  color: Colours.STONE,
-  fontSize: typography.caption,
-},
 });
