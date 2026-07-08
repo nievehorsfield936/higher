@@ -1,171 +1,113 @@
 import { router } from 'expo-router';
-import React, { useMemo } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { ScrollView, StyleSheet, Text } from 'react-native';
 
-import Button from '@/components/Button';
-import Card from '@/components/Card';
+import Header from '@/components/Header';
 import Screen from '@/components/Screen';
-import { Colours } from '@/constants/colours';
-import ContinueStudyCard from '@/src/components/ui/ContinueStudyCard';
-import DashboardHero from '@/src/components/ui/DashboardHero';
-import EmptyState from '@/src/components/ui/EmptyState';
-import InsightCard from '@/src/components/ui/InsightCard';
-import SectionHeader from '@/src/components/ui/SectionHeader';
-import StatGrid from '@/src/components/ui/StatGrid';
-import SubjectSummaryCard from '@/src/components/ui/SubjectSummaryCard';
-import { useStudyBrain } from '@/src/hooks/useStudyBrain';
-import { useAppStore } from '@/src/store';
-import { spacing, typography } from '@/src/theme';
 
-import { useHigherDaily } from '../../src/hooks/useHigherDaily';
+import DashboardAssessmentCard from '@/src/components/dashboard/DashboardAssessmentCard';
+import DashboardContinueCard from '@/src/components/dashboard/DashboardContinueCard';
+import DashboardFocusCard from '@/src/components/dashboard/DashboardFocusCard';
+import DashboardPreparationRing from '@/src/components/dashboard/DashboardPreparationRing';
+import DashboardStats from '@/src/components/dashboard/DashboardStats';
+
+import { useHigher } from '@/src/core';
+import { useAppStore } from '@/src/store';
+import { Colours } from '@/constants/colours';
+import { spacing } from '@/src/theme';
 
 export default function HomeScreen() {
-  const subjects = useAppStore((state) => state.subjects);
+  const higher = useHigher();
+
   const notes = useAppStore((state) => state.notes);
+  const assessments = useAppStore((state) => state.assessments);
 
-  const currentSubject = subjects[0];
-  const brain = useStudyBrain();
-  const today = useHigherDaily();
+  const latestNote = notes.at(-1);
 
-  const recentNote = useMemo(() => {
-    return [...notes].sort(
-      (a, b) =>
-        new Date(b.updatedAt).getTime() -
-        new Date(a.updatedAt).getTime()
-    )[0];
-  }, [notes]);
+  const nextAssessment = assessments[0];
 
   return (
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <DashboardHero
-          greeting="Today's Focus"
-          streak={brain.streak}
-          preparation={today.preparation}
+        <Header
+          title="Good afternoon 👋"
+          subtitle="Let's build some momentum today."
         />
 
-        {currentSubject ? (
-          <>
-            <Card>
-              <Text style={styles.cardLabel}>TODAY</Text>
+        <DashboardPreparationRing
+          preparation={higher.higher.preparation}
+        />
 
-              <Text style={styles.cardTitle}>{today.title}</Text>
+        <DashboardFocusCard
+          title={higher.today.title}
+          reason={higher.today.reason}
+          priority={higher.today.priority}
+          minutes={higher.today.estimatedMinutes}
+          onPress={() => router.push('/session/focus')}
+        />
 
-              <Text style={styles.cardBody}>{today.reason}</Text>
+        <DashboardStats
+          stats={[
+            {
+              label: 'Notes',
+              value: notes.length,
+            },
+            {
+              label: 'Flashcards',
+              value: higher.higher.flashcards.length,
+            },
+            {
+              label: 'Preparation',
+              value: `${higher.higher.preparation}%`,
+            },
+          ]}
+        />
 
-              <Text style={styles.priority}>
-                {today.priority} Priority · {today.estimatedMinutes} mins
-              </Text>
-
-              <Button
-                title="Start Today's Session"
-                onPress={() => router.push('/session')}
-              />
-            </Card>
-
-            <SectionHeader title="This Week" />
-
-            <StatGrid
-              stats={[
-                {
-                  label: 'Sessions',
-                  value: brain.sessionsThisWeek,
-                },
-                {
-                  label: 'Minutes',
-                  value: brain.studyMinutes,
-                },
-                {
-                  label: 'Due',
-                  value: brain.dueCards,
-                },
-              ]}
-            />
-
-            <SectionHeader title="Continue Studying" />
-
-            <ContinueStudyCard
-              subject={currentSubject.name}
-              title={brain.nextAction.title}
-              meta={`${brain.nextAction.duration} min session`}
-              onPress={() => router.push('/session')}
-            />
-
-            <SectionHeader title="Higher Insight" />
-
-            <InsightCard title="Today’s focus" body={brain.insight} />
-
-            {recentNote ? (
-              <>
-                <SectionHeader title="Continue" />
-
-                <Card>
-                  <Text style={styles.cardLabel}>RECENT NOTE</Text>
-                  <Text style={styles.cardTitle}>{recentNote.title}</Text>
-                  <Text numberOfLines={3} style={styles.cardBody}>
-                    {recentNote.content || 'No content yet'}
-                  </Text>
-                </Card>
-              </>
-            ) : null}
-
-            <SectionHeader title="Current Subject" />
-
-            <SubjectSummaryCard
-              code={currentSubject.code}
-              name={currentSubject.name}
-              preparation={brain.preparation}
-            />
-
-            <View style={styles.buttonWrap}>
-              <Button
-                title="Open workspace"
-                onPress={() => router.push(`/subject/${currentSubject.id}`)}
-              />
-            </View>
-          </>
-        ) : (
-          <EmptyState
-            title="No subjects yet"
-            body="Create your first subject to build your study workspace."
+        {nextAssessment && (
+          <DashboardAssessmentCard
+            title={nextAssessment.title}
+            due={
+              nextAssessment.dueDate
+                ? `Due ${new Date(
+                    nextAssessment.dueDate
+                  ).toLocaleDateString()}`
+                : 'No due date'
+            }
           />
         )}
 
-        <View style={styles.bottomSpace} />
+        {latestNote && (
+          <DashboardContinueCard
+            title={latestNote.title}
+            subtitle="Continue where you left off."
+            onPress={() =>
+              router.push({
+                pathname: '/subject/[id]/note/[noteId]',
+                params: {
+                  id: latestNote.subjectId,
+                  noteId: latestNote.id,
+                },
+              } as never)
+            }
+          />
+        )}
+
+        <Text style={styles.footer}>
+          Higher continuously analyses your notes,
+          flashcards and study sessions to keep your
+          preparation score up to date.
+        </Text>
       </ScrollView>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  cardLabel: {
-    fontSize: typography.overline,
-    letterSpacing: 2,
-    color: Colours.STONE,
-    marginBottom: spacing.sm,
-  },
-  cardTitle: {
-    fontSize: typography.h2,
-    fontWeight: '700',
-    color: Colours.INK,
-    marginBottom: spacing.sm,
-  },
-  cardBody: {
-    fontSize: typography.body,
-    lineHeight: 24,
-    color: Colours.STONE,
-    marginBottom: spacing.lg,
-  },
-  priority: {
-    fontSize: typography.caption,
-    color: Colours.SAGE,
-    fontWeight: '700',
-    marginBottom: spacing.lg,
-  },
-  buttonWrap: {
+  footer: {
     marginTop: spacing.xl,
-  },
-  bottomSpace: {
-    height: spacing.xxl,
+    marginBottom: spacing.xxl,
+    textAlign: 'center',
+    color: Colours.STONE,
+    lineHeight: 22,
   },
 });

@@ -1,24 +1,21 @@
-export type SessionStepType =
-  | 'flashcards'
+export type FocusTaskType =
   | 'notes'
-  | 'assessment';
+  | 'flashcards'
+  | 'quiz'
+  | 'assessment'
+  | 'break';
 
-export interface SessionStep {
+export interface FocusTask {
   id: string;
-  type: SessionStepType;
-
+  type: FocusTaskType;
   title: string;
-  subtitle: string;
-
+  description: string;
   estimatedMinutes: number;
-
   completed: boolean;
 }
 
-export interface StudySession {
-  totalMinutes: number;
-
+export interface FocusSession {
   preparation: number;
-
-  steps: SessionStep[];
+  totalMinutes: number;
+  tasks: FocusTask[];
 }
