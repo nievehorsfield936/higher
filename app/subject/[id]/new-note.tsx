@@ -19,6 +19,7 @@ import StudyQualityCard from '@/src/components/editor/StudyQualityCard';
 import InsightCard from '@/src/components/ui/InsightCard';
 import SectionHeader from '@/src/components/ui/SectionHeader';
 import { Colours } from '@/constants/colours';
+import { useLiveNoteAnalysis } from '@/src/hooks/useLiveNoteAnalysis';
 import { useAppStore } from '@/src/store';
 import { spacing, typography } from '@/src/theme';
 
@@ -29,13 +30,10 @@ export default function NewNoteScreen() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
 
+  const { analysis, flashcards } = useLiveNoteAnalysis(title, content);
+
   const canSave = title.trim().length > 0;
-
-  const wordCount =
-    content.trim().length === 0
-      ? 0
-      : content.trim().split(/\s+/).length;
-
+  const wordCount = analysis.wordCount;
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 
   function handleSave() {
@@ -106,9 +104,30 @@ export default function NewNoteScreen() {
           <SectionHeader title="Higher Tools" />
 
           <InsightCard
-            title="AI tools coming soon"
-            body="Soon, Higher will summarise notes, generate flashcards and create quiz questions from this editor."
+            title="Live analysis is active"
+            body={`${analysis.concepts.length} concept${
+              analysis.concepts.length === 1 ? '' : 's'
+            } detected · ${analysis.suggestedFlashcards} possible flashcards · ${analysis.estimatedQuizQuestions} possible quiz questions.`}
           />
+
+          <SectionHeader title="Flashcards Detected" />
+
+          {flashcards.length === 0 ? (
+            <InsightCard
+              title="No flashcards yet"
+              body="Keep writing and Higher will detect concepts automatically."
+            />
+          ) : (
+            flashcards.slice(0, 3).map((card) => (
+              <Card key={card.id} style={styles.flashcardPreview}>
+                <Text style={styles.previewLabel}>QUESTION</Text>
+
+                <Text style={styles.previewQuestion}>{card.front}</Text>
+
+                <Text style={styles.previewAnswer}>{card.back}</Text>
+              </Card>
+            ))
+          )}
 
           <View style={styles.buttonWrap}>
             <Button
@@ -178,6 +197,26 @@ const styles = StyleSheet.create({
   },
   qualityWrap: {
     marginTop: spacing.md,
+  },
+  flashcardPreview: {
+    marginTop: spacing.md,
+  },
+  previewLabel: {
+    fontSize: typography.overline,
+    letterSpacing: 2,
+    color: Colours.STONE,
+    marginBottom: spacing.sm,
+  },
+  previewQuestion: {
+    fontSize: typography.h2,
+    fontWeight: '700',
+    color: Colours.INK,
+    marginBottom: spacing.sm,
+  },
+  previewAnswer: {
+    fontSize: typography.body,
+    color: Colours.STONE,
+    lineHeight: 24,
   },
   buttonWrap: {
     marginTop: spacing.xl,
