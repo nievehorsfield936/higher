@@ -11,39 +11,51 @@ import {
 
 import Button from '@/components/Button';
 import Card from '@/components/Card';
-import Header from '@/components/Header';
 import Screen from '@/components/Screen';
+import EmptyState from '@/src/components/ui/EmptyState';
+import SectionHeader from '@/src/components/ui/SectionHeader';
+import StatGrid from '@/src/components/ui/StatGrid';
+import SubjectHero from '@/src/components/ui/SubjectHero';
 import { Colours } from '@/constants/colours';
 import NoteCard from '@/src/components/notes/NoteCard';
+import { useStudyBrain } from '@/src/hooks/useStudyBrain';
 import { useAppStore } from '@/src/store';
+import { spacing, typography } from '@/src/theme';
 
 export default function SubjectNotesScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [search, setSearch] = useState('');
+
+  const brain = useStudyBrain();
 
   const subjects = useAppStore((state) => state.subjects);
   const allNotes = useAppStore((state) => state.notes);
 
   const subject = subjects.find((item) => item.id === id);
 
+  const subjectNotes = useMemo(
+    () => allNotes.filter((note) => note.subjectId === id),
+    [allNotes, id]
+  );
+
   const notes = useMemo(() => {
-    return allNotes.filter((note) => {
-      const matchesSubject = note.subjectId === id;
+    const searchTerm = search.toLowerCase();
 
-      const searchTerm = search.toLowerCase();
-
-      const matchesSearch =
+    return subjectNotes.filter((note) => {
+      return (
         note.title.toLowerCase().includes(searchTerm) ||
-        note.content.toLowerCase().includes(searchTerm);
-
-      return matchesSubject && matchesSearch;
+        note.content.toLowerCase().includes(searchTerm)
+      );
     });
-  }, [allNotes, id, search]);
+  }, [subjectNotes, search]);
 
   if (!subject) {
     return (
       <Screen>
-        <Header title="Subject not found" />
+        <EmptyState
+          title="Subject not found"
+          body="This notes workspace could not be loaded."
+        />
       </Screen>
     );
   }
@@ -55,9 +67,13 @@ export default function SubjectNotesScreen() {
           <Text style={styles.backText}>← {subject.code}</Text>
         </Pressable>
 
-        <Header
-          title="Notes"
-          subtitle={`Your notes for ${subject.name}.`}
+        <SubjectHero
+          code={subject.code}
+          name="Notes"
+          preparation={brain.notesScore}
+          meta={`${subjectNotes.length} note${
+            subjectNotes.length === 1 ? '' : 's'
+          } in ${subject.name}`}
         />
 
         <TextInput
@@ -68,37 +84,54 @@ export default function SubjectNotesScreen() {
           style={styles.search}
         />
 
+        <SectionHeader title="Notes Library" />
+
         {notes.length === 0 ? (
-          <Card>
-            <Text style={styles.label}>NO NOTES FOUND</Text>
-
-            <Text style={styles.emptyTitle}>
-              {search ? 'No matching notes.' : 'Start your first note.'}
-            </Text>
-
-            <Text style={styles.emptyBody}>
-              {search
+          <EmptyState
+            title={search ? 'No matching notes.' : 'Start your first note.'}
+            body={
+              search
                 ? 'Try another search term.'
-                : 'Create lecture notes, summaries, essay plans or revision notes.'}
-            </Text>
-          </Card>
+                : 'Create lecture notes, summaries, essay plans or revision notes.'
+            }
+          />
         ) : (
           notes.map((note) => (
-            <NoteCard
-              key={note.id}
-              note={note}
-              onPress={() =>
-                router.push({
-                  pathname: '/subject/[id]/note/[noteId]',
-                  params: {
-                    id,
-                    noteId: note.id,
-                  },
-                } as never)
-              }
-            />
+            <View key={note.id} style={styles.noteWrap}>
+              <NoteCard
+                note={note}
+                onPress={() =>
+                  router.push({
+                    pathname: '/subject/[id]/note/[noteId]',
+                    params: {
+                      id,
+                      noteId: note.id,
+                    },
+                  } as never)
+                }
+              />
+            </View>
           ))
         )}
+
+        <SectionHeader title="Notes Stats" />
+
+        <StatGrid
+          stats={[
+            {
+              label: 'Notes',
+              value: subjectNotes.length,
+            },
+            {
+              label: 'Shown',
+              value: notes.length,
+            },
+            {
+              label: 'Score',
+              value: `${brain.notesScore}%`,
+            },
+          ]}
+        />
 
         <View style={styles.buttonWrap}>
           <Button
@@ -111,6 +144,8 @@ export default function SubjectNotesScreen() {
             }
           />
         </View>
+
+        <View style={styles.bottomSpace} />
       </ScrollView>
     </Screen>
   );
@@ -118,46 +153,29 @@ export default function SubjectNotesScreen() {
 
 const styles = StyleSheet.create({
   backText: {
-    marginTop: 16,
-    marginBottom: 16,
-    fontSize: 16,
-    fontWeight: '600',
+    marginTop: spacing.md,
+    marginBottom: spacing.md,
+    fontSize: typography.body,
+    fontWeight: '700',
     color: Colours.SAGE,
   },
-
   search: {
     borderWidth: 1,
     borderColor: Colours.RULE,
-    borderRadius: 16,
-    padding: 16,
-    fontSize: 16,
-    backgroundColor: Colours.WARM_WHITE,
+    borderRadius: 18,
+    padding: spacing.md,
+    fontSize: typography.body,
+    backgroundColor: Colours.OFF,
     color: Colours.INK,
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
-
-  label: {
-    fontSize: 11,
-    letterSpacing: 2,
-    color: Colours.STONE,
-    marginBottom: 10,
+  noteWrap: {
+    marginBottom: spacing.md,
   },
-
-  emptyTitle: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: Colours.INK,
-    marginBottom: 8,
-  },
-
-  emptyBody: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: Colours.STONE,
-  },
-
   buttonWrap: {
-    marginTop: 22,
-    marginBottom: 40,
+    marginTop: spacing.xl,
+  },
+  bottomSpace: {
+    height: spacing.xxl,
   },
 });

@@ -1,12 +1,25 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 
 import Button from '@/components/Button';
-import Header from '@/components/Header';
+import Card from '@/components/Card';
 import Screen from '@/components/Screen';
+import InsightCard from '@/src/components/ui/InsightCard';
+import AIActionBar from '@/src/components/editor/AIActionBar';
+import SectionHeader from '@/src/components/ui/SectionHeader';
 import { Colours } from '@/constants/colours';
 import { useAppStore } from '@/src/store';
+import { spacing, typography } from '@/src/theme';
 
 export default function NewNoteScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -15,8 +28,10 @@ export default function NewNoteScreen() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
 
+  const canSave = title.trim().length > 0;
+
   function handleSave() {
-    if (!title.trim()) return;
+    if (!canSave) return;
 
     const now = new Date().toISOString();
 
@@ -34,79 +49,142 @@ export default function NewNoteScreen() {
 
   return (
     <Screen>
-      <Pressable onPress={() => router.back()}>
-        <Text style={styles.backText}>← Notes</Text>
-      </Pressable>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <Pressable onPress={() => router.back()}>
+            <Text style={styles.backText}>← Notes</Text>
+          </Pressable>
 
-      <Header
-        title="New note"
-        subtitle="Capture a lecture, reading, idea or revision summary."
-      />
+          <Text style={styles.label}>NEW NOTE</Text>
 
-      <View style={styles.fieldGroup}>
-        <Text style={styles.label}>TITLE</Text>
-        <TextInput
-          value={title}
-          onChangeText={setTitle}
-          placeholder="e.g. Lecture 1 — Introduction"
-          placeholderTextColor={Colours.STONE}
-          style={styles.titleInput}
-        />
-      </View>
+          <TextInput
+            value={title}
+            onChangeText={setTitle}
+            placeholder="Untitled lecture"
+            placeholderTextColor={Colours.STONE}
+            style={styles.titleInput}
+          />
 
-      <View style={styles.fieldGroup}>
-        <Text style={styles.label}>NOTE</Text>
-        <TextInput
-          value={content}
-          onChangeText={setContent}
-          placeholder="Start writing..."
-          placeholderTextColor={Colours.STONE}
-          multiline
-          textAlignVertical="top"
-          style={styles.bodyInput}
-        />
-      </View>
+          <Card>
 
-      <Button title="Save note" onPress={handleSave} />
+  <Text style={styles.editorLabel}>NOTE BODY</Text>
+
+  <EditorToolbar />
+
+  <TextInput
+    value={content}
+    onChangeText={setContent}
+    placeholder="Start writing your lecture notes..."
+    placeholderTextColor={Colours.STONE}
+    multiline
+    textAlignVertical="top"
+    style={styles.bodyInput}
+  />
+
+  <View style={styles.editorFooter}>
+    <Text style={styles.footerText}>
+      {content.trim().length === 0
+        ? '0 words'
+        : `${content.trim().split(/\s+/).length} words`}
+    </Text>
+
+    <Text style={styles.footerText}>
+      {Math.max(
+        1,
+        Math.ceil(
+          content.trim().split(/\s+/).length / 200
+        )
+      )} min read
+    </Text>
+
+  </View>
+
+</Card>
+
+          <SectionHeader title="Higher Tools" />
+<View style={styles.aiWrap}>
+  <AIActionBar />
+</View>
+          <InsightCard
+            title="AI tools coming soon"
+            body="Soon, Higher will summarise notes, generate flashcards and create quiz questions from this editor."
+          />
+
+          <View style={styles.buttonWrap}>
+            <Button
+              title="Save note"
+              onPress={handleSave}
+              disabled={!canSave}
+            />
+          </View>
+
+          <View style={styles.bottomSpace} />
+        </ScrollView>
+      </KeyboardAvoidingView>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
+  flex: {
+    flex: 1,
+  },
   backText: {
-    marginTop: 16,
-    marginBottom: 16,
-    fontSize: 16,
-    fontWeight: '600',
+    marginTop: spacing.md,
+    marginBottom: spacing.lg,
+    fontSize: typography.body,
+    fontWeight: '700',
     color: Colours.SAGE,
   },
-  fieldGroup: {
-    marginBottom: 22,
-  },
   label: {
-    fontSize: 11,
+    fontSize: typography.overline,
     letterSpacing: 2,
     color: Colours.STONE,
-    marginBottom: 10,
+    marginBottom: spacing.sm,
   },
   titleInput: {
-    borderWidth: 1,
-    borderColor: Colours.RULE,
-    borderRadius: 18,
-    padding: 18,
-    fontSize: 17,
+    fontFamily: 'PlayfairDisplay_500Medium',
+    fontSize: 38,
+    lineHeight: 44,
     color: Colours.INK,
-    backgroundColor: Colours.WARM_WHITE,
+    marginBottom: spacing.xl,
+  },
+  editorLabel: {
+    fontSize: typography.overline,
+    letterSpacing: 2,
+    color: Colours.STONE,
+    marginBottom: spacing.md,
   },
   bodyInput: {
-    minHeight: 220,
-    borderWidth: 1,
-    borderColor: Colours.RULE,
-    borderRadius: 18,
-    padding: 18,
-    fontSize: 16,
-    lineHeight: 24,
+    minHeight: 300,
+    fontSize: typography.body,
+    lineHeight: 26,
     color: Colours.INK,
-    backgroundColor: Colours.WARM_WHITE,
   },
+  buttonWrap: {
+    marginTop: spacing.xl,
+  },
+  bottomSpace: {
+    height: spacing.xxl,
+  },
+  editorFooter: {
+  marginTop: spacing.lg,
+  paddingTop: spacing.md,
+  borderTopWidth: 1,
+  borderTopColor: Colours.RULE,
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+},
+
+aiWrap: {
+  marginTop: spacing.md,
+},
+
+footerText: {
+  color: Colours.STONE,
+  fontSize: typography.caption,
+},
 });
