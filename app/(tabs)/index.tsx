@@ -1,7 +1,8 @@
 import { router } from 'expo-router';
 import React, { useMemo } from 'react';
-import { ScrollView, StyleSheet, Text } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import Button from '@/components/Button';
 import Card from '@/components/Card';
 import Screen from '@/components/Screen';
 import { Colours } from '@/constants/colours';
@@ -16,12 +17,15 @@ import { useStudyBrain } from '@/src/hooks/useStudyBrain';
 import { useAppStore } from '@/src/store';
 import { spacing, typography } from '@/src/theme';
 
+import { useHigherDaily } from '../../src/hooks/useHigherDaily';
+
 export default function HomeScreen() {
   const subjects = useAppStore((state) => state.subjects);
   const notes = useAppStore((state) => state.notes);
 
   const currentSubject = subjects[0];
   const brain = useStudyBrain();
+  const today = useHigherDaily();
 
   const recentNote = useMemo(() => {
     return [...notes].sort(
@@ -35,19 +39,29 @@ export default function HomeScreen() {
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false}>
         <DashboardHero
-          greeting="Good morning."
+          greeting="Today's Focus"
           streak={brain.streak}
-          preparation={brain.preparation}
+          preparation={today.preparation}
         />
 
         {currentSubject ? (
           <>
-            <ContinueStudyCard
-              subject={currentSubject.name}
-              title={brain.nextAction.title}
-              meta={`${brain.nextAction.duration} min session`}
-              onPress={() => router.push('/session')}
-            />
+            <Card>
+              <Text style={styles.cardLabel}>TODAY</Text>
+
+              <Text style={styles.cardTitle}>{today.title}</Text>
+
+              <Text style={styles.cardBody}>{today.reason}</Text>
+
+              <Text style={styles.priority}>
+                {today.priority} Priority · {today.estimatedMinutes} mins
+              </Text>
+
+              <Button
+                title="Start Today's Session"
+                onPress={() => router.push('/session')}
+              />
+            </Card>
 
             <SectionHeader title="This Week" />
 
@@ -66,6 +80,15 @@ export default function HomeScreen() {
                   value: brain.dueCards,
                 },
               ]}
+            />
+
+            <SectionHeader title="Continue Studying" />
+
+            <ContinueStudyCard
+              subject={currentSubject.name}
+              title={brain.nextAction.title}
+              meta={`${brain.nextAction.duration} min session`}
+              onPress={() => router.push('/session')}
             />
 
             <SectionHeader title="Higher Insight" />
@@ -93,6 +116,13 @@ export default function HomeScreen() {
               name={currentSubject.name}
               preparation={brain.preparation}
             />
+
+            <View style={styles.buttonWrap}>
+              <Button
+                title="Open workspace"
+                onPress={() => router.push(`/subject/${currentSubject.id}`)}
+              />
+            </View>
           </>
         ) : (
           <EmptyState
@@ -101,7 +131,7 @@ export default function HomeScreen() {
           />
         )}
 
-        <Text style={styles.bottomSpace} />
+        <View style={styles.bottomSpace} />
       </ScrollView>
     </Screen>
   );
@@ -121,10 +151,19 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   cardBody: {
-    marginTop: spacing.md,
     fontSize: typography.body,
     lineHeight: 24,
     color: Colours.STONE,
+    marginBottom: spacing.lg,
+  },
+  priority: {
+    fontSize: typography.caption,
+    color: Colours.SAGE,
+    fontWeight: '700',
+    marginBottom: spacing.lg,
+  },
+  buttonWrap: {
+    marginTop: spacing.xl,
   },
   bottomSpace: {
     height: spacing.xxl,
