@@ -55,7 +55,7 @@ export default function RootLayout() {
 <Stack.Screen name="session/index" />
 <Stack.Screen name="session/active" />
 <Stack.Screen name="session/complete" />
-
+<Stack.Screen name="session/focus" />
 </Stack>
   );
 }

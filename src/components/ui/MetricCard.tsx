@@ -1,49 +1,53 @@
 import React from 'react';
-import { StyleSheet, Text } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+} from 'react-native';
 
-import Card from '@/components/Card';
+import GlassCard from './GlassCard';
+
 import { Colours } from '@/constants/colours';
-import { spacing, typography } from '@/src/theme';
+import {
+  spacing,
+  typography,
+} from '@/src/design';
 
 type Props = {
+  value: string | number;
   label: string;
-  value: string;
-  subtitle?: string;
 };
 
 export default function MetricCard({
-  label,
   value,
-  subtitle,
+  label,
 }: Props) {
   return (
-    <Card>
-      <Text style={styles.label}>{label}</Text>
+    <GlassCard style={styles.card}>
+      <Text style={styles.value}>
+        {value}
+      </Text>
 
-      <Text style={styles.value}>{value}</Text>
-
-      {subtitle ? (
-        <Text style={styles.subtitle}>{subtitle}</Text>
-      ) : null}
-    </Card>
+      <Text style={styles.label}>
+        {label}
+      </Text>
+    </GlassCard>
   );
 }
 
 const styles = StyleSheet.create({
-  label: {
-    fontSize: typography.overline,
-    letterSpacing: 2,
-    color: Colours.STONE,
-    marginBottom: spacing.sm,
+  card: {
+    flex: 1,
+    alignItems: 'center',
   },
+
   value: {
-    fontSize: 42,
+    fontSize: typography.h2,
     fontWeight: '700',
     color: Colours.INK,
   },
-  subtitle: {
+
+  label: {
     marginTop: spacing.sm,
-    fontSize: typography.body,
     color: Colours.STONE,
   },
 });

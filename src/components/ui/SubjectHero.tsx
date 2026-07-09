@@ -1,87 +1,123 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import ProgressBar from '@/components/common/ProgressBar';
+import GlassCard from './GlassCard';
+import AnimatedPreparationRing from '@/src/components/dashboard/AnimatedPreparationRing';
+
 import { Colours } from '@/constants/colours';
-import { spacing, typography } from '@/src/theme';
+import {
+  radius,
+  spacing,
+  typography,
+} from '@/src/design';
 
 type Props = {
-  code: string;
   name: string;
+  code: string;
   preparation: number;
-  meta?: string;
+  nextTask?: string;
 };
 
 export default function SubjectHero({
-  code,
   name,
+  code,
   preparation,
-  meta,
+  nextTask,
 }: Props) {
   return (
-    <View style={styles.container}>
-      <Text style={styles.code}>{code}</Text>
+    <GlassCard style={styles.card}>
+      <View style={styles.left}>
+        <Text style={styles.code}>
+          {code.toUpperCase()}
+        </Text>
 
-      <Text style={styles.name}>{name}</Text>
+        <Text style={styles.name}>
+          {name}
+        </Text>
 
-      <View style={styles.row}>
-        <Text style={styles.score}>{preparation}%</Text>
-
-        <View style={styles.progressWrap}>
-          <Text style={styles.label}>Prepared</Text>
-          <ProgressBar progress={preparation} />
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>
+            {preparation >= 85
+              ? 'Exam Ready'
+              : preparation >= 70
+              ? 'On Track'
+              : preparation >= 50
+              ? 'Building'
+              : 'Getting Started'}
+          </Text>
         </View>
+
+        {nextTask ? (
+          <>
+            <Text style={styles.label}>
+              NEXT TASK
+            </Text>
+
+            <Text style={styles.task}>
+              {nextTask}
+            </Text>
+          </>
+        ) : null}
       </View>
 
-      {meta ? <Text style={styles.meta}>{meta}</Text> : null}
-    </View>
+      <AnimatedPreparationRing
+        value={preparation}
+        size={120}
+      />
+    </GlassCard>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: spacing.md,
-    marginBottom: spacing.xl,
+  card: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
+
+  left: {
+    flex: 1,
+    paddingRight: spacing.lg,
+  },
+
   code: {
     fontSize: typography.overline,
     letterSpacing: 2,
     color: Colours.STONE,
     marginBottom: spacing.sm,
   },
+
   name: {
-    fontFamily: 'PlayfairDisplay_500Medium',
-    fontSize: 36,
-    lineHeight: 42,
+    fontSize: typography.h1,
+    fontWeight: '700',
     color: Colours.INK,
-    marginBottom: spacing.xl,
+    marginBottom: spacing.md,
   },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: spacing.lg,
+
+  badge: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#E8F5E9',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.pill,
+    marginBottom: spacing.lg,
   },
-  score: {
-    fontFamily: 'PlayfairDisplay_500Medium',
-    fontSize: 64,
-    lineHeight: 66,
-    color: Colours.INK,
+
+  badgeText: {
+    color: Colours.SAGE,
+    fontWeight: '700',
   },
-  progressWrap: {
-    flex: 1,
-    paddingBottom: spacing.sm,
-  },
+
   label: {
-    marginBottom: spacing.sm,
     fontSize: typography.overline,
     letterSpacing: 2,
     color: Colours.STONE,
-    textTransform: 'uppercase',
+    marginBottom: spacing.xs,
   },
-  meta: {
-    marginTop: spacing.lg,
+
+  task: {
     fontSize: typography.body,
-    lineHeight: 24,
-    color: Colours.STONE,
+    color: Colours.INK,
+    fontWeight: '600',
   },
 });

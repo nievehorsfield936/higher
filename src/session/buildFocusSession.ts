@@ -1,7 +1,9 @@
-import { FocusSession } from './types';
+import type { FocusSession } from './types';
 
-export function buildFocusSession(preparation: number): FocusSession {
-  const tasks = [];
+export function buildFocusSession(
+  preparation: number
+): FocusSession {
+  const tasks: FocusSession['tasks'] = [];
 
   if (preparation < 50) {
     tasks.push({
@@ -18,7 +20,7 @@ export function buildFocusSession(preparation: number): FocusSession {
     id: 'cards',
     type: 'flashcards',
     title: 'Review Flashcards',
-    description: 'Complete today's review cards.',
+    description: "Complete today's review cards.",
     estimatedMinutes: 15,
     completed: false,
   });
